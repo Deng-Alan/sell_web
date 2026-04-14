@@ -1,0 +1,98 @@
+[
+  {
+    "id": "feature-001",
+    "name": "建立模板化任务骨架",
+    "passes": true,
+    "evidence": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".claude/tasks.md",
+      "openspec/project.md"
+    ]
+  },
+  {
+    "id": "feature-002",
+    "name": "沉淀基础版规划文档",
+    "passes": true,
+    "evidence": [
+      "基础版PRD-客户确认版.md",
+      "基础版PRD-开发清单版.md",
+      "基础版-报价拆分清单.md",
+      "基础版-数据库设计初稿.md",
+      "基础版-页面原型清单.md",
+      "基础版-任务拆解清单.md"
+    ]
+  },
+  {
+    "id": "feature-003",
+    "name": "创建基础版 MVP OpenSpec change",
+    "passes": true,
+    "evidence": [
+      "openspec/changes/add-showcase-site-mvp/proposal.md",
+      "openspec/changes/add-showcase-site-mvp/tasks.md",
+      "openspec/changes/add-showcase-site-mvp/specs/product-showcase/spec.md",
+      "openspec/changes/add-showcase-site-mvp/specs/admin-content-management/spec.md",
+      "openspec/changes/add-showcase-site-mvp/specs/contact-routing/spec.md"
+    ]
+  },
+  {
+    "id": "feature-004",
+    "name": "确定基础版 MVP 技术栈",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-005",
+    "name": "确定首轮实现目录结构",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-006",
+    "name": "初始化前后端工程骨架",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-007",
+    "name": "落地数据库模型和迁移脚本",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-008",
+    "name": "实现管理员登录和鉴权",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-009",
+    "name": "实现分类管理模块",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-010",
+    "name": "实现商品管理模块",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-011",
+    "name": "实现联系方式和首页配置管理",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-012",
+    "name": "实现前台首页、列表页和详情页",
+    "passes": false,
+    "evidence": []
+  },
+  {
+    "id": "feature-013",
+    "name": "完成联调、适配、测试和上线准备",
+    "passes": false,
+    "evidence": []
+  }
+]

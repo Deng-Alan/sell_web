@@ -1,0 +1,8 @@
+{
+  "session_id": "sell-web-planning",
+  "timestamp": "2026-04-14T00:00:00Z",
+  "last_completed_feature": "feature-003",
+  "next_recommended_feature": "feature-004",
+  "summary": "已完成文档基线、模板骨架和 MVP OpenSpec change。当前 backlog 已拆到可执行粒度，下一步先完成技术选型和仓库目录结构。",
+  "issues": []
+}

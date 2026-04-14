@@ -1,0 +1,171 @@
+[
+  {
+    "id": "feature-001",
+    "category": "项目基线",
+    "description": "建立项目文档基线和模板化任务骨架",
+    "steps": [
+      "创建 AGENTS.md 和 CLAUDE.md",
+      "创建 .claude 任务与进度文件",
+      "创建 openspec 基础结构"
+    ],
+    "priority": "high",
+    "status": "completed",
+    "tested": true
+  },
+  {
+    "id": "feature-002",
+    "category": "需求规划",
+    "description": "沉淀基础版商品展示站的范围、任务和交付物",
+    "steps": [
+      "整理客户确认版 PRD",
+      "整理开发清单版 PRD",
+      "整理报价、数据库、页面原型和任务拆解文档"
+    ],
+    "priority": "high",
+    "status": "completed",
+    "tested": true
+  },
+  {
+    "id": "feature-003",
+    "category": "OpenSpec",
+    "description": "创建基础版 MVP 的 OpenSpec proposal 和能力定义",
+    "steps": [
+      "创建 MVP proposal",
+      "创建 change tasks",
+      "创建 product-showcase、admin-content-management、contact-routing spec delta"
+    ],
+    "priority": "high",
+    "status": "completed",
+    "tested": true
+  },
+  {
+    "id": "feature-004",
+    "category": "架构规划",
+    "description": "确定基础版 MVP 的技术栈",
+    "steps": [
+      "确定前端框架",
+      "确定后端框架",
+      "确定数据库和部署方案"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-005",
+    "category": "架构规划",
+    "description": "确定首轮实现的仓库目录结构",
+    "steps": [
+      "确定前台目录结构",
+      "确定后台目录结构",
+      "确定共享配置与上传目录"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-006",
+    "category": "项目初始化",
+    "description": "初始化可开发的前后端工程骨架",
+    "steps": [
+      "初始化前端工程",
+      "初始化后端工程",
+      "初始化环境变量和 README"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-007",
+    "category": "数据层",
+    "description": "落地数据库模型和迁移脚本",
+    "steps": [
+      "创建分类、商品、图片、联系方式、站点配置等表",
+      "添加必要索引",
+      "准备初始化迁移脚本"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-008",
+    "category": "后台能力",
+    "description": "实现管理员登录和鉴权能力",
+    "steps": [
+      "实现登录接口",
+      "实现登录态校验",
+      "实现后台访问保护"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-009",
+    "category": "后台能力",
+    "description": "实现分类管理模块",
+    "steps": [
+      "实现分类增删改查接口",
+      "实现分类排序与启停",
+      "实现后台分类管理页面"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-010",
+    "category": "后台能力",
+    "description": "实现商品管理模块",
+    "steps": [
+      "实现商品增删改查接口",
+      "实现商品上下架、推荐和排序",
+      "实现后台商品管理页面"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-011",
+    "category": "后台能力",
+    "description": "实现联系方式和首页配置管理",
+    "steps": [
+      "实现联系方式管理接口与页面",
+      "实现首页内容配置接口与页面",
+      "实现图片上传能力"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-012",
+    "category": "前台能力",
+    "description": "实现前台首页、列表页和详情页",
+    "steps": [
+      "实现前台公共布局",
+      "实现首页、列表页、详情页",
+      "实现联系跳转和 SEO 基础接入"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  },
+  {
+    "id": "feature-013",
+    "category": "集成验收",
+    "description": "完成联调、适配、测试和上线准备",
+    "steps": [
+      "完成前后台联调",
+      "完成移动端适配和基础测试",
+      "完成上线部署和初始内容录入"
+    ],
+    "priority": "high",
+    "status": "pending",
+    "tested": false
+  }
+]
