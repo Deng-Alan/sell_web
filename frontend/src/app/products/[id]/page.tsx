@@ -135,10 +135,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Detail</p>
             <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">详情信息区</h2>
             <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--muted)]">
-              <p>
-                {product.summary} 这一页已经优先连到{" "}
-                <code className="rounded bg-white px-1.5 py-0.5">/api/public/products/{id}</code>，接口失败时会回退到演示商品。
-              </p>
+              <p>{product.summary}</p>
 
               <div className="rounded-3xl border border-[var(--line)] bg-white p-5">
                 <p className="text-sm font-medium text-[var(--ink)]">商品说明</p>
@@ -171,7 +168,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                       <div key={label} className="rounded-2xl border border-[var(--line)] bg-white p-4">
                         <p className="text-xs uppercase tracking-[0.25em] text-[var(--accent)]">Preview</p>
                         <p className="mt-2 text-sm font-medium text-[var(--ink)]">{label}</p>
-                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">预览位 {index + 1}，用于移动端调试排版。</p>
+                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">商品图片展示位 {index + 1}</p>
                       </div>
                     ))}
               </div>
@@ -181,9 +178,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <aside className="space-y-5">
             <section className="rounded-[2rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
               <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">SEO</p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">基础 metadata</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">搜索引擎优化</h2>
               <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                当前页面使用 App Router 的 <code className="rounded bg-[var(--bg-soft)] px-1.5 py-0.5">generateMetadata</code>，详情变化后标题和描述会同步更新。
+                页面标题和描述已针对搜索引擎进行优化，提升商品曝光度。
               </p>
 
               <div className="mt-5 grid gap-3">
@@ -211,7 +208,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   ))
                 ) : (
                   <div className="rounded-3xl border border-dashed border-[var(--line)] bg-white p-5 text-sm text-[var(--muted)]">
-                    当前没有更多相关推荐，接口恢复后这里会显示同分类或推荐商品。
+                    暂无更多相关推荐商品。
                   </div>
                 )}
               </div>
