@@ -251,35 +251,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
           ) : null}
         </section>
-
-        <section className="grid gap-5 rounded-[2rem] border border-[var(--line)] bg-white p-4 shadow-[0_18px_60px_rgba(16,16,16,0.08)] sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:p-8">
-          <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Contact</p>
-            <h2 className="text-2xl font-semibold text-[var(--ink)]">咨询入口</h2>
-            <p className="max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              多种联系方式供您选择，我们随时为您提供专业咨询服务。
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2e241d]"
-            >
-              查看全部联系方式
-            </Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {catalog.contacts.map((contact) => (
-              <Link
-                key={contact.id}
-                href="/contact"
-                className="group rounded-3xl border border-[var(--line)] bg-[#fff8ef] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_12px_30px_rgba(16,16,16,0.08)]"
-              >
-                <p className="text-xs uppercase tracking-[0.25em] text-[var(--accent)]">{contact.label}</p>
-                <p className="mt-2 text-sm font-medium text-[var(--ink)]">{contact.value}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
       </section>
     </main>
   );
