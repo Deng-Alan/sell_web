@@ -23,7 +23,6 @@ SELECT seed.type,
 FROM (
     VALUES
         ('wechat', '微信客服', 'sellweb_support', NULL, NULL, 'home,product,detail', 10, 1),
-        ('telegram', 'Telegram 客服', '@sellweb_support', NULL, 'https://t.me/sellweb_support', 'home,product,detail', 20, 1),
         ('qr', '二维码咨询', '扫码联系', 'https://dummyimage.com/600x600/111827/ffffff.png&text=SELL+WEB+QR', NULL, 'home,detail', 30, 1),
         ('email', '售后邮箱', 'support@example.com', NULL, 'mailto:support@example.com', 'detail,footer', 40, 1)
 ) AS seed(type, name, value, qr_image, jump_url, display_places, sort_order, status)
@@ -103,7 +102,7 @@ VALUES
     (
         'contact_us',
         '联系入口',
-        '首页和详情页都可以直接引导到微信、Telegram、二维码或邮箱。',
+        '首页和详情页都可以直接引导到微信、二维码或邮箱。',
         NULL,
         '{"variant":"contact-actions"}'::jsonb,
         40,
@@ -181,7 +180,7 @@ SELECT
     20,
     1
 FROM (SELECT id FROM product_categories WHERE slug = 'social-accounts' LIMIT 1) AS category_ref,
-     (SELECT id FROM contacts WHERE type = 'telegram' AND name = 'Telegram 客服' LIMIT 1) AS contact_ref
+     (SELECT id FROM contacts WHERE type = 'wechat' AND name = '微信客服' LIMIT 1) AS contact_ref
 WHERE NOT EXISTS (
     SELECT 1
     FROM products
