@@ -606,13 +606,47 @@ export default function AdminContactsPage() {
                 </AdminField>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <AdminField label="二维码图片" hint="可填图片地址，二维码类型时会展示">
-                    <input
-                      value={formState.qrImage}
-                      onChange={(event) => handleFormChange("qrImage", event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-                      placeholder="https://..."
-                    />
+                  <AdminField label="二维码图片" hint="可上传图片或填写图片地址">
+                    <div className="space-y-2">
+                      <input
+                        value={formState.qrImage}
+                        onChange={(event) => handleFormChange("qrImage", event.target.value)}
+                        className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                        placeholder="https://..."
+                      />
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-white/10 bg-slate-900/50 px-4 py-3 text-sm text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/5">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            try {
+                              const response = await fetch("/api/upload", {
+                                method: "POST",
+                                body: formData
+                              });
+
+                              if (!response.ok) {
+                                throw new Error("上传失败");
+                              }
+
+                              const data = await response.json();
+                              handleFormChange("qrImage", data.url);
+                            } catch (error) {
+                              alert(error instanceof Error ? error.message : "上传失败");
+                            }
+                          }}
+                        />
+                        <span>📤</span>
+                        <span>点击上传图片</span>
+                      </label>
+                    </div>
                   </AdminField>
                   <AdminField label="跳转链接" hint="可用于按钮跳转、外链或私聊入口">
                     <input
