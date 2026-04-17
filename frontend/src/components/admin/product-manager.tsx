@@ -380,38 +380,6 @@ export function AdminProductManager() {
               </div>
             ) : null}
           </AdminPanel>
-
-          <div className="space-y-4">
-            <AdminPanel title="功能说明" description="商品管理功能列表。">
-              <ul className="space-y-3 text-sm leading-6 text-slate-300">
-                <li>GET /api/products - 读取商品列表。</li>
-                <li>GET /api/categories - 拉取商品分类下拉。</li>
-                <li>PUT /api/products/:id/status - 切换商品上下架。</li>
-                <li>PUT /api/products/:id/recommended - 切换推荐位。</li>
-                <li>DELETE /api/products/:id - 删除商品。</li>
-              </ul>
-            </AdminPanel>
-
-            <AdminPanel title="信息说明" description="当前列表展示的信息。">
-              <div className="grid gap-4">
-                <AdminField label="基础信息" hint="id、categoryId、categoryName、contactId、contactName、name">
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
-                    name / categoryId / contactId / name
-                  </div>
-                </AdminField>
-                <AdminField label="展示信息" hint="coverImage、shortDesc、content、price、originalPrice、stock">
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
-                    coverImage / shortDesc / content / price / originalPrice / stock
-                  </div>
-                </AdminField>
-                <AdminField label="状态信息" hint="isRecommended、sortOrder、status、imageUrls">
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
-                    isRecommended / sortOrder / status / imageUrls
-                  </div>
-                </AdminField>
-              </div>
-            </AdminPanel>
-          </div>
         </div>
       </div>
     </AdminShell>

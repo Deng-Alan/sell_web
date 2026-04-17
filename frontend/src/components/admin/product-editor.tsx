@@ -500,16 +500,6 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
             <AdminMetricCard label="商品来源" value={viewModel?.source === "api" ? "API" : "Fallback"} hint="可用时自动切换" accent="amber" />
             <AdminMetricCard label="状态标签" value={toStatusLabel(Number(form.status) as AdminFlagValue)} hint="0/1 语义已对齐" accent="violet" />
 
-            <AdminPanel title="功能说明" description="这个页面可以直接保存商品。">
-              <ul className="space-y-3 text-sm leading-6 text-slate-300">
-                <li>GET /api/categories - 读取分类下拉。</li>
-                <li>GET /api/contacts - 读取联系人下拉。</li>
-                <li>GET /api/products/:id - 编辑态加载现有商品。</li>
-                <li>POST /api/products - 新增保存。</li>
-                <li>PUT /api/products/:id - 编辑保存。</li>
-              </ul>
-            </AdminPanel>
-
             <AdminPanel title="当前预览" description="根据表单即时拼出商品卡片预览。">
               <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,15,28,0.92)_0%,rgba(10,19,35,0.82)_100%)] p-4">
                 <div className="space-y-3">
@@ -545,14 +535,6 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     </p>
                   ) : null}
                 </div>
-              </div>
-            </AdminPanel>
-
-            <AdminPanel title="状态" description="用于提示当前页面是否已经加载到商品数据。">
-              <div className="space-y-3 text-sm leading-6 text-slate-300">
-                <p>当前分类、联系人和商品主表内容都已经对齐。</p>
-                <p>保存时不会再提交 SEO / tags / notes 这类不存在的内容。</p>
-                <p>如果不可用，页面会自动回退到本地样例，保持可开发。</p>
               </div>
             </AdminPanel>
           </div>
