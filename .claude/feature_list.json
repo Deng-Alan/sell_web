@@ -38,56 +38,134 @@
   {
     "id": "feature-004",
     "name": "确定基础版 MVP 技术栈",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "基础版-技术栈决策.md",
+      "openspec/changes/update-mvp-stack-next-springboot/proposal.md"
+    ]
   },
   {
     "id": "feature-005",
     "name": "确定首轮实现目录结构",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "docs/planning/基础版-目录结构设计.md",
+      "openspec/changes/update-mvp-stack-next-springboot/proposal.md"
+    ]
   },
   {
     "id": "feature-006",
     "name": "初始化前后端工程骨架",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "frontend/package.json",
+      "frontend/src/app/page.tsx",
+      "backend/pom.xml",
+      "backend/src/main/java/com/example/sellweb/SellWebApplication.java",
+      "database/migrations/V001__create_admin_users.sql"
+    ]
   },
   {
     "id": "feature-007",
     "name": "落地数据库模型和迁移脚本",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "基础版-数据库设计初稿.md",
+      "database/migrations/V001__create_admin_users.sql",
+      "database/migrations/V007__create_home_sections.sql",
+      "backend/src/main/java/com/example/sellweb/entity/Product.java",
+      "backend/src/main/java/com/example/sellweb/repository/ProductRepository.java",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS"
+    ]
   },
   {
     "id": "feature-008",
     "name": "实现管理员登录和鉴权",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "backend/src/main/java/com/example/sellweb/security/JwtUtils.java",
+      "backend/src/main/java/com/example/sellweb/security/JwtAuthenticationFilter.java",
+      "backend/src/main/java/com/example/sellweb/service/AuthService.java",
+      "backend/src/main/java/com/example/sellweb/controller/AuthController.java",
+      "backend/src/main/java/com/example/sellweb/dto/LoginRequest.java",
+      "backend/src/main/java/com/example/sellweb/dto/LoginResponse.java",
+      "backend/src/main/java/com/example/sellweb/dto/ApiResponse.java",
+      "backend/src/main/resources/db/migration/V008__insert_default_admin.sql",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS"
+    ]
   },
   {
     "id": "feature-009",
     "name": "实现分类管理模块",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "backend/src/main/java/com/example/sellweb/controller/CategoryController.java",
+      "backend/src/main/java/com/example/sellweb/service/CategoryService.java",
+      "backend/src/main/java/com/example/sellweb/dto/category/CategoryRequest.java",
+      "backend/src/main/java/com/example/sellweb/dto/category/CategoryResponse.java",
+      "backend/src/main/java/com/example/sellweb/dto/category/CategorySortRequest.java",
+      "backend/src/main/java/com/example/sellweb/dto/category/CategoryStatusRequest.java",
+      "frontend/src/app/admin/categories/page.tsx",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS",
+      "npm --prefix frontend run build => success"
+    ]
   },
   {
     "id": "feature-010",
     "name": "实现商品管理模块",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "backend/src/main/java/com/example/sellweb/controller/ProductController.java",
+      "backend/src/main/java/com/example/sellweb/service/ProductService.java",
+      "backend/src/main/java/com/example/sellweb/dto/product/ProductQueryRequest.java",
+      "backend/src/main/java/com/example/sellweb/dto/product/ProductRequest.java",
+      "backend/src/main/java/com/example/sellweb/dto/product/ProductResponse.java",
+      "frontend/src/app/admin/products/page.tsx",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS",
+      "npm --prefix frontend run build => success"
+    ]
   },
   {
     "id": "feature-011",
     "name": "实现联系方式和首页配置管理",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "backend/src/main/java/com/example/sellweb/controller/ContactController.java",
+      "backend/src/main/java/com/example/sellweb/service/ContactService.java",
+      "backend/src/main/java/com/example/sellweb/controller/SiteSettingController.java",
+      "backend/src/main/java/com/example/sellweb/controller/HomeSectionController.java",
+      "backend/src/main/java/com/example/sellweb/controller/HomeConfigController.java",
+      "backend/src/main/java/com/example/sellweb/service/SiteSettingService.java",
+      "backend/src/main/java/com/example/sellweb/service/HomeSectionService.java",
+      "backend/src/main/java/com/example/sellweb/service/HomeConfigService.java",
+      "backend/src/main/java/com/example/sellweb/controller/UploadController.java",
+      "backend/src/main/java/com/example/sellweb/service/UploadService.java",
+      "frontend/src/app/admin/contacts/page.tsx",
+      "frontend/src/app/admin/settings/home/page.tsx",
+      "frontend/src/app/admin/settings/seo/page.tsx",
+      "frontend/src/types/admin.ts",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS",
+      "npm --prefix frontend run build => success"
+    ]
   },
   {
     "id": "feature-012",
     "name": "实现前台首页、列表页和详情页",
-    "passes": false,
-    "evidence": []
+    "passes": true,
+    "evidence": [
+      "frontend/src/app/page.tsx",
+      "frontend/src/app/products/page.tsx",
+      "frontend/src/app/products/[id]/page.tsx",
+      "frontend/src/components/common/site-shell.tsx",
+      "frontend/src/components/common/section-heading.tsx",
+      "frontend/src/components/common/surface-card.tsx",
+      "frontend/src/components/common/metric-tile.tsx",
+      "frontend/src/types/home.ts",
+      "backend/src/main/java/com/example/sellweb/controller/PublicReadController.java",
+      "backend/src/main/java/com/example/sellweb/config/SecurityConfig.java",
+      "mvn -f backend/pom.xml -DskipTests compile => BUILD SUCCESS",
+      "npm --prefix frontend run build => success"
+    ]
   },
   {
     "id": "feature-013",

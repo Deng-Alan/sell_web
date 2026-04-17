@@ -48,8 +48,8 @@
       "确定数据库和部署方案"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-005",
@@ -61,8 +61,8 @@
       "确定共享配置与上传目录"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-006",
@@ -74,8 +74,8 @@
       "初始化环境变量和 README"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-007",
@@ -87,8 +87,8 @@
       "准备初始化迁移脚本"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-008",
@@ -100,8 +100,8 @@
       "实现后台访问保护"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-009",
@@ -113,8 +113,8 @@
       "实现后台分类管理页面"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-010",
@@ -126,8 +126,8 @@
       "实现后台商品管理页面"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-011",
@@ -139,8 +139,8 @@
       "实现图片上传能力"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-012",
@@ -152,8 +152,8 @@
       "实现联系跳转和 SEO 基础接入"
     ],
     "priority": "high",
-    "status": "pending",
-    "tested": false
+    "status": "completed",
+    "tested": true
   },
   {
     "id": "feature-013",

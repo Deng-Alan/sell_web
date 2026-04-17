@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg: #f4eadb;
+  --bg-soft: #fff9f0;
+  --ink: #1d1511;
+  --muted: #6b5e54;
+  --surface: rgba(255, 250, 244, 0.72);
+  --surface-strong: #fffaf4;
+  --line: rgba(60, 43, 33, 0.12);
+  --accent: #a94f1d;
+  --shadow: 0 28px 70px rgba(51, 34, 22, 0.12);
+  --font-display: "Iowan Old Style", "Baskerville", "Palatino Linotype", "Times New Roman", serif;
+  --font-body: "Avenir Next", "Segoe UI", "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(217, 151, 93, 0.24), transparent 30%),
+    radial-gradient(circle at 85% 20%, rgba(42, 31, 26, 0.12), transparent 26%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+  color: var(--ink);
+  font-family: var(--font-body);
+  position: relative;
+  isolation: isolate;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(60, 43, 33, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 43, 33, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 92%);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(169, 79, 29, 0.14), transparent 18%),
+    radial-gradient(circle at 75% 70%, rgba(29, 21, 17, 0.08), transparent 20%);
+  filter: blur(28px);
+  opacity: 0.75;
+  z-index: -1;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(169, 79, 29, 0.2);
+  color: var(--ink);
+}

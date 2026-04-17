@@ -131,23 +131,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {catalog.categories.map((category) => (
-                <span
-                  key={category.value}
-                  className={`rounded-full border px-3 py-2 text-xs font-medium ${
-                    category.value === query.categoryId || (!query.categoryId && category.value === "all")
-                      ? "border-[var(--accent)] bg-[rgba(169,79,29,0.08)] text-[var(--accent)]"
-                      : "border-[var(--line)] bg-white text-[var(--ink)]/70"
-                  }`}
-                >
-                  {category.label}
-                </span>
-              ))}
-            </div>
           </div>
 
-          <form className="mt-5 grid gap-3 rounded-3xl border border-[var(--line)] bg-white p-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto] lg:p-5">
+          <form className="mt-5 grid gap-3 rounded-3xl border border-[var(--line)] bg-white p-4 lg:grid-cols-[1fr_auto] lg:p-5">
             <input type="hidden" name="page" value="1" />
             <input type="hidden" name="pageSize" value={query.pageSize || "9"} />
             <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink)]">
@@ -158,34 +144,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 placeholder="搜索商品名、SKU、说明"
                 className="rounded-2xl border border-[var(--line)] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
               />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink)]">
-              分类
-              <select
-                name="category"
-                defaultValue={query.categoryId || "all"}
-                className="rounded-2xl border border-[var(--line)] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
-              >
-                <option value="all">全部分类</option>
-                {catalog.categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink)]">
-              库存
-              <select
-                name="stock"
-                defaultValue={query.stock || "all"}
-                className="rounded-2xl border border-[var(--line)] bg-[#fffdf8] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
-              >
-                <option value="all">全部库存</option>
-                <option value="in-stock">有库存</option>
-                <option value="low-stock">低库存</option>
-                <option value="sold-out">售罄</option>
-              </select>
             </label>
             <div className="flex items-end">
               <button
@@ -198,9 +156,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </form>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted)]">
-            <p>
-              当前分类：<span className="font-medium text-[var(--ink)]">{selectedCategoryLabel}</span>
-            </p>
             <p>当前结果：{catalog.stats.visibleProducts} 条</p>
           </div>
 

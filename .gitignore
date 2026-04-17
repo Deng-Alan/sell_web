@@ -2,15 +2,20 @@
 node_modules/
 .pnpm-store/
 
-# Build outputs
-dist/
-.output/
-.nuxt/
+# Frontend specific
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# Backend specific
+backend/target/
+backend/.env
 
 # Environment files
 .env
 .env.local
 .env.*.local
+frontend/.env.local
 
 # IDE
 .vscode/
@@ -25,7 +30,7 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Uploads (local dev)
+# Uploads
 uploads/
 
 # Claude session files
@@ -34,3 +39,6 @@ uploads/
 # Temp
 tmp/
 temp/
+
+# Keep empty directories
+!.gitkeep

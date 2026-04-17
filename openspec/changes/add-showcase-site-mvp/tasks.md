@@ -4,9 +4,9 @@
 - [x] 1.3 Create spec deltas for public showcase, admin management, and contact routing
 
 ## 2. Next Planning Tasks
-- [ ] 2.1 Finalize the technical stack for frontend, backend, database, and deployment
-- [ ] 2.2 Decide the initial repository structure for implementation
-- [ ] 2.3 Break the approved MVP into first-round implementation tasks
+- [x] 2.1 Finalize the technical stack for frontend, backend, database, and deployment
+- [x] 2.2 Decide the initial repository structure for implementation
+- [x] 2.3 Break the approved MVP into first-round implementation tasks
 
 ## 3. Implementation Gate
-- [ ] 3.1 Approve this proposal before starting code work
+- [x] 3.1 Approve this proposal before starting code work

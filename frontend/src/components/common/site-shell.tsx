@@ -1,0 +1,14 @@
+import type { ReactNode } from "react";
+
+type SiteShellProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+export function SiteShell({ children, className = "" }: SiteShellProps) {
+  return (
+    <div className={`mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10 ${className}`.trim()}>
+      {children}
+    </div>
+  );
+}
