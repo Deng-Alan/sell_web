@@ -17,7 +17,7 @@ const readinessItems = [
   {
     label: "联系方式",
     value: "运行中",
-    hint: "可维护微信、Telegram、邮箱和二维码等联系入口。"
+    hint: "可维护微信、QQ、邮箱和二维码等联系入口。"
   },
   {
     label: "站点配置",

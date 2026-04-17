@@ -50,7 +50,7 @@ const fallbackFeatures: HomeFeature[] = [
   },
   {
     title: "联系配置入口",
-    description: "微信、QQ、Telegram、邮箱等入口全部预留为可配置项，便于人工成交与快速迭代。",
+    description: "微信、QQ、邮箱等入口全部预留为可配置项，便于人工成交与快速迭代。",
     accent: "rust"
   }
 ];
@@ -72,7 +72,6 @@ const fallbackSteps: HomeStep[] = [
 
 const fallbackChannels: HomeChannel[] = [
   { label: "微信", hint: "主联络入口" },
-  { label: "Telegram", hint: "跨平台沟通" },
   { label: "邮箱", hint: "异步留资" }
 ];
 
@@ -97,7 +96,6 @@ const fallbackContent: HomePageContent = {
   contactDescription: "联系区会直接承接后台维护的联系方式，方便快速咨询与人工成交。",
   contactActions: [
     { label: "微信咨询", href: "#" },
-    { label: "Telegram", href: "#" },
     { label: "邮件联系", href: "#" }
   ]
 };

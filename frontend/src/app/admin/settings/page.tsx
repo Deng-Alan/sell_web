@@ -106,7 +106,7 @@ export default function AdminSettingsPage() {
                 </AdminField>
                 <AdminField label="默认客服入口" hint="前台咨询按钮的默认跳转。">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
-                    WeChat / Telegram / QR
+                    WeChat / QQ / QR
                   </div>
                 </AdminField>
                 <AdminField label="发布状态" hint="草稿、预览或已发布。">

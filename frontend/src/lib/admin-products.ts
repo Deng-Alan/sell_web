@@ -71,19 +71,6 @@ const FALLBACK_CONTACTS: AdminContactRecord[] = [
     status: 1,
     createdAt: "2026-04-15 09:00:00",
     updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 2,
-    type: "telegram",
-    name: "Telegram",
-    value: "@sellweb_support",
-    qrImage: null,
-    jumpUrl: "https://t.me/sellweb_support",
-    displayPlaces: "product",
-    sortOrder: 20,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
   }
 ];
 

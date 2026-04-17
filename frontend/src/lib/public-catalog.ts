@@ -159,19 +159,6 @@ const FALLBACK_CONTACTS: PublicContactRecord[] = [
     updatedAt: "2026-04-15 09:00:00"
   },
   {
-    id: 3,
-    type: "telegram",
-    name: "Telegram",
-    value: "@showcase_support",
-    qrImage: null,
-    jumpUrl: "https://t.me/showcase_support",
-    displayPlaces: "详情页、联系区",
-    sortOrder: 3,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
     id: 4,
     type: "email",
     name: "邮箱",
