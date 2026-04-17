@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { formatCurrency, loadPublicProductPage, type ShowcaseContactCard, type ShowcaseProductDetail } from "@/lib/public-catalog";
+import { formatCurrency, loadPublicProductPage, type ShowcaseProductDetail } from "@/lib/public-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = await params;
-  const { product, relatedProducts, contacts, source } = await loadPublicProductPage(id);
+  const { product, relatedProducts } = await loadPublicProductPage(id);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(169,79,29,0.08),transparent_24%),linear-gradient(180deg,#fff8ef_0%,#f4ecdf_100%)]">
@@ -101,13 +101,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <MetaCard label="状态" value={product.status === "published" ? "已发布" : "草稿/归档"} />
-                <MetaCard label="推荐" value={product.featured ? "开启" : "关闭"} />
-                <MetaCard label="分类" value={product.categoryName} />
-                <MetaCard label="更新时间" value={product.updatedAt} />
-              </div>
-
               <div className="rounded-[1.6rem] border border-[rgba(169,79,29,0.18)] bg-[rgba(169,79,29,0.06)] p-5">
                 <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">Contact</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{product.contactHint}</p>
@@ -141,55 +134,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <p className="text-sm font-medium text-[var(--ink)]">商品说明</p>
                 <p className="mt-3 leading-7">{product.description}</p>
               </div>
-
-              <div className="rounded-3xl border border-[var(--line)] bg-white p-5">
-                <p className="text-sm font-medium text-[var(--ink)]">使用与备注</p>
-                <ul className="mt-3 space-y-2 text-[var(--muted)]">
-                  {product.notes.map((note) => (
-                    <li key={note} className="flex gap-3">
-                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-                      <span>{note}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {product.galleryUrls.length > 0
-                  ? product.galleryUrls.slice(0, 3).map((url, index) => (
-                      <div key={`${url}-${index}`} className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
-                        <div className="flex min-h-[120px] items-end bg-[var(--bg-soft)] p-4 text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-                          图片 {index + 1}
-                        </div>
-                        <div className="break-all border-t border-[var(--line)] px-4 py-3 text-xs text-[var(--muted)]">{url}</div>
-                      </div>
-                    ))
-                  : ["主视觉", "详情说明", "联系承接"].map((label, index) => (
-                      <div key={label} className="rounded-2xl border border-[var(--line)] bg-white p-4">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[var(--accent)]">Preview</p>
-                        <p className="mt-2 text-sm font-medium text-[var(--ink)]">{label}</p>
-                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">商品图片展示位 {index + 1}</p>
-                      </div>
-                    ))}
-              </div>
             </div>
           </article>
 
           <aside className="space-y-5">
-            <section className="rounded-[2rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">SEO</p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">搜索引擎优化</h2>
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                页面标题和描述已针对搜索引擎进行优化，提升商品曝光度。
-              </p>
-
-              <div className="mt-5 grid gap-3">
-                <SeoLine label="title" value={product.seoTitle} />
-                <SeoLine label="description" value={product.seoDescription} />
-                <SeoLine label="canonical" value={`/products/${id}`} />
-              </div>
-            </section>
-
             <section className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,248,239,0.96)] p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
               <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Related</p>
               <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">相关推荐</h2>
@@ -213,16 +161,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 )}
               </div>
             </section>
-
-            <section className="rounded-[2rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Contacts</p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">联系方式</h2>
-              <div className="mt-5 grid gap-3">
-                {contacts.map((contact) => (
-                  <ContactLine key={contact.id} contact={contact} />
-                ))}
-              </div>
-            </section>
           </aside>
         </section>
       </section>
@@ -236,36 +174,5 @@ function HeroStat({ label, value }: { label: string; value: string }) {
       <p className="text-xs uppercase tracking-[0.24em] text-white/62">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
     </div>
-  );
-}
-
-function MetaCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.4rem] border border-[var(--line)] bg-white p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">{label}</p>
-      <p className="mt-2 text-sm font-medium text-[var(--ink)]">{value}</p>
-    </div>
-  );
-}
-
-function SeoLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg-soft)] px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{label}</p>
-      <p className="mt-2 break-all text-sm text-[var(--ink)]">{value}</p>
-    </div>
-  );
-}
-
-function ContactLine({ contact }: { contact: ShowcaseContactCard }) {
-  return (
-    <a
-      href={contact.href}
-      className="rounded-3xl border border-[var(--line)] bg-[rgba(255,249,241,0.92)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
-    >
-      <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">{contact.label}</p>
-      <p className="mt-2 text-sm font-medium text-[var(--ink)]">{contact.value}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
-    </a>
   );
 }
