@@ -341,30 +341,7 @@ function normalizeCategory(record: PublicCategoryRecord): ShowcaseCategoryOption
 }
 
 function formatDisplayPlaces(value: string | null | undefined) {
-  if (!value) {
-    return "人工咨询";
-  }
-
-  const labels = value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .map((item) => {
-      switch (item) {
-        case "home":
-          return "首页";
-        case "product":
-          return "商品页";
-        case "detail":
-          return "详情页";
-        case "footer":
-          return "页脚";
-        default:
-          return item;
-      }
-    });
-
-  return labels.length > 0 ? labels.join(" / ") : "人工咨询";
+  return "在线咨询";
 }
 
 function normalizeContact(record: PublicContactRecord): ShowcaseContactCard {
