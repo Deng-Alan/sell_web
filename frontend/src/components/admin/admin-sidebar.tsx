@@ -6,13 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { clearStoredAdminAuth, getStoredAdminProfile } from "@/lib/auth";
 
 const adminNavigation = [
-  { label: "后台总览", href: "/admin" },
   { label: "商品管理", href: "/admin/products" },
   { label: "分类管理", href: "/admin/categories" },
   { label: "联系方式", href: "/admin/contacts" },
   { label: "站点设置", href: "/admin/settings" },
-  { label: "首页配置", href: "/admin/settings/home" },
-  { label: "SEO 配置", href: "/admin/settings/seo" }
+  { label: "首页配置", href: "/admin/settings/home" }
 ] as const;
 
 function isActivePath(pathname: string, href: string) {

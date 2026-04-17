@@ -198,7 +198,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
     { label: "分类", value: viewModel?.categories.length ?? 0, hint: "读取真实分类接口" },
     { label: "联系方式", value: viewModel?.contacts.length ?? 0, hint: "读取真实联系方式接口" },
     { label: "图集", value: toImageUrlsCount(form.imageUrlsText), hint: "一行一张图，直接提交数组" },
-    { label: "数据源", value: viewModel?.source === "api" ? "API" : "Fallback", hint: "后端可用时自动切换" }
+    { label: "数据源", value: viewModel?.source === "api" ? "API" : "Fallback", hint: "可用时自动切换" }
   ] as const;
 
   const effectiveProduct = viewModel?.product;
@@ -209,7 +209,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
         <AdminPageHeader
           eyebrow={mode === "create" ? "Admin / Products / Create" : "Admin / Products / Edit"}
           title={mode === "create" ? "新增商品" : `编辑商品 ${productId ?? ""}`.trim()}
-          description="表单字段已经按后端真实 ProductRequest 对齐，提交时会直接走 POST / PUT 接口。"
+          description="表单信息已经对齐，提交时会直接保存。"
           actions={
             <>
               <Link
@@ -250,9 +250,9 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
 
         <div className="grid gap-6 xl:grid-cols-[1.35fr_0.9fr]">
           <div className="space-y-6">
-            <AdminPanel title="基础信息" description="这里的字段都能直接映射到后端 ProductRequest。">
+            <AdminPanel title="基础信息" description="这里的内容都能直接保存。">
               <div className="grid gap-4 lg:grid-cols-2">
-                <AdminField label="分类" hint="后端使用 categoryId。" required>
+                <AdminField label="分类" hint="选择商品分类。" required>
                   <select
                     className={selectClassName}
                     value={form.categoryId}
@@ -266,7 +266,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     ))}
                   </select>
                 </AdminField>
-                <AdminField label="商品名称" hint="后端使用 name。" required>
+                <AdminField label="商品名称" hint="填写商品名称。" required>
                   <input
                     className={inputClassName}
                     placeholder="例如：Gmail 资源包"
@@ -280,7 +280,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     <option value="0">隐藏</option>
                   </select>
                 </AdminField>
-                <AdminField label="是否推荐" hint="后端使用 isRecommended。">
+                <AdminField label="是否推荐" hint="推荐商品会优先展示。">
                   <select
                     className={selectClassName}
                     value={form.isRecommended}
@@ -290,7 +290,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     <option value="0">普通</option>
                   </select>
                 </AdminField>
-                <AdminField label="排序值" hint="后端使用 sortOrder。">
+                <AdminField label="排序值" hint="数字越小越靠前。">
                   <input
                     className={inputClassName}
                     placeholder="0"
@@ -298,7 +298,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     onChange={(event) => updateField("sortOrder", event.target.value)}
                   />
                 </AdminField>
-                <AdminField label="联系人" hint="后端使用 contactId，允许为空。">
+                <AdminField label="联系人" hint="可选择绑定联系人，允许为空。">
                   <select className={selectClassName} value={form.contactId} onChange={(event) => updateField("contactId", event.target.value)}>
                     <option value="">不绑定</option>
                     {viewModel?.contacts.map((contact) => (
@@ -308,7 +308,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     ))}
                   </select>
                 </AdminField>
-                <AdminField label="简短说明" hint="后端使用 shortDesc。" className="lg:col-span-2">
+                <AdminField label="简短说明" hint="用于前台卡片和详情页首屏的摘要。" className="lg:col-span-2">
                   <textarea
                     className={textAreaClassName}
                     placeholder="用于前台卡片和详情页首屏的摘要。"
@@ -319,10 +319,10 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
               </div>
             </AdminPanel>
 
-            <AdminPanel title="媒体与详情" description="这里对应 coverImage、imageUrls 和 content。">
+            <AdminPanel title="媒体与详情" description="这里对应封面图、图集和商品详情。">
               <div className="grid gap-4 lg:grid-cols-[1fr_0.72fr]">
                 <div className="space-y-4">
-                  <AdminField label="封面图 URL" hint="后端使用 coverImage。">
+                  <AdminField label="封面图 URL" hint="商品封面图片地址。">
                     <div className="space-y-3">
                       <input
                         className={inputClassName}
@@ -405,7 +405,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                 </div>
               </div>
               <div className="mt-4">
-                <AdminField label="商品详情正文" hint="后端使用 content。">
+                <AdminField label="商品详情正文" hint="填写商品详情正文。">
                   <textarea
                     className={textAreaClassName}
                     placeholder="填写商品详情正文。"
@@ -416,9 +416,9 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
               </div>
             </AdminPanel>
 
-            <AdminPanel title="价格与库存" description="这些字段会直接提交到后端并进入商品主表。">
+            <AdminPanel title="价格与库存" description="这些内容会直接保存。">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <AdminField label="售价" hint="后端使用 price。" required>
+                <AdminField label="售价" hint="商品售价。" required>
                   <input
                     className={inputClassName}
                     placeholder="18"
@@ -426,7 +426,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     onChange={(event) => updateField("price", event.target.value)}
                   />
                 </AdminField>
-                <AdminField label="原价" hint="后端使用 originalPrice，允许为空。">
+                <AdminField label="原价" hint="商品原价，允许为空。">
                   <input
                     className={inputClassName}
                     placeholder="30"
@@ -434,7 +434,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     onChange={(event) => updateField("originalPrice", event.target.value)}
                   />
                 </AdminField>
-                <AdminField label="库存" hint="后端使用 stock。" required>
+                <AdminField label="库存" hint="商品库存数量。" required>
                   <input
                     className={inputClassName}
                     placeholder="126"
@@ -442,7 +442,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     onChange={(event) => updateField("stock", event.target.value)}
                   />
                 </AdminField>
-                <AdminField label="当前状态" hint="与 status 字段同步。">
+                <AdminField label="当前状态" hint="与 status 同步。">
                   <div className="flex h-full items-center rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-300">
                     {toStatusLabel(Number(form.status) as AdminFlagValue)}
                   </div>
@@ -452,7 +452,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
 
             <AdminPanel
               title="操作区"
-              description="保存草稿和上架都走真实保存接口，后端会按当前表单状态写入。"
+              description="保存未保存内容和上架都会直接保存。"
               actions={
                 <>
                   <button
@@ -461,7 +461,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                     disabled={loading || pendingAction !== null}
                     type="button"
                   >
-                    保存草稿
+                    保存未保存内容
                   </button>
                   <button
                     className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 disabled:opacity-50"
@@ -480,11 +480,11 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                   <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
                     <li>分类、名称、售价和库存是必填。</li>
                     <li>如果不绑定联系人，保留空值即可。</li>
-                    <li>图集字段会按换行分割成数组。</li>
+                    <li>图集内容会按换行分割成数组。</li>
                   </ul>
                 </div>
                 <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-900/70 p-4">
-                  <p className="text-sm font-medium text-white">真实字段映射</p>
+                  <p className="text-sm font-medium text-white">实际保存内容</p>
                   <p className="mt-3 text-sm leading-6 text-slate-400">
                     categoryId / name / coverImage / shortDesc / content / price / originalPrice / stock / contactId / isRecommended /
                     sortOrder / status / imageUrls
@@ -495,12 +495,12 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
           </div>
 
           <div className="space-y-4">
-            <AdminMetricCard label="编辑模式" value={mode === "create" ? "Create" : "Edit"} hint="当前页面已接真实表单流" accent="cyan" />
-            <AdminMetricCard label="图集数量" value={String(toImageUrlsCount(form.imageUrlsText))} hint="提交时会映射为数组" accent="emerald" />
-            <AdminMetricCard label="商品来源" value={viewModel?.source === "api" ? "API" : "Fallback"} hint="后端可用时自动切换" accent="amber" />
-            <AdminMetricCard label="状态标签" value={toStatusLabel(Number(form.status) as AdminFlagValue)} hint="0/1 语义已和后端对齐" accent="violet" />
+            <AdminMetricCard label="编辑模式" value={mode === "create" ? "Create" : "Edit"} hint="当前页面已接表单流" accent="cyan" />
+            <AdminMetricCard label="图集数量" value={String(toImageUrlsCount(form.imageUrlsText))} hint="提交时会转为数组" accent="emerald" />
+            <AdminMetricCard label="商品来源" value={viewModel?.source === "api" ? "API" : "Fallback"} hint="可用时自动切换" accent="amber" />
+            <AdminMetricCard label="状态标签" value={toStatusLabel(Number(form.status) as AdminFlagValue)} hint="0/1 语义已对齐" accent="violet" />
 
-            <AdminPanel title="联调说明" description="这个页面现在可以直接对接 Spring Boot 商品增改接口。">
+            <AdminPanel title="功能说明" description="这个页面可以直接保存商品。">
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
                 <li>GET /api/categories - 读取分类下拉。</li>
                 <li>GET /api/contacts - 读取联系人下拉。</li>
@@ -548,11 +548,11 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
               </div>
             </AdminPanel>
 
-            <AdminPanel title="状态" description="用于提示当前页面是否已经加载到真实商品数据。">
+            <AdminPanel title="状态" description="用于提示当前页面是否已经加载到商品数据。">
               <div className="space-y-3 text-sm leading-6 text-slate-300">
-                <p>当前分类、联系人和商品主表字段都已经按后端真实 DTO 接好。</p>
-                <p>保存时不会再提交 SEO / tags / notes 这类后端不存在的字段。</p>
-                <p>如果后端不可用，页面会自动回退到本地样例，保持可开发。</p>
+                <p>当前分类、联系人和商品主表内容都已经对齐。</p>
+                <p>保存时不会再提交 SEO / tags / notes 这类不存在的内容。</p>
+                <p>如果不可用，页面会自动回退到本地样例，保持可开发。</p>
               </div>
             </AdminPanel>
           </div>

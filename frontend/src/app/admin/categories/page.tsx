@@ -213,9 +213,9 @@ export default function AdminCategoriesPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="Admin / Categories"
-          title="Category Management"
-          description="This page is connected to the real category API and supports loading, filtering, create, edit, delete, enable/disable, and sort order updates."
+          eyebrow="管理后台 / 分类管理"
+          title="分类管理"
+          description="管理商品分类,支持加载、筛选、创建、编辑、删除、启停和排序。"
           actions={
             <>
               <button
@@ -223,28 +223,28 @@ export default function AdminCategoriesPage() {
                 onClick={() => void reloadCategories({ preserveEditor: true })}
                 type="button"
               >
-                Refresh
+                刷新
               </button>
               <button
                 className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 transition hover:bg-cyan-400/20"
                 onClick={beginCreate}
                 type="button"
               >
-                New Category
+                新建分类
               </button>
             </>
           }
         />
 
         <div className="grid gap-4 md:grid-cols-3">
-          <AdminMetricCard label="Total Categories" value={String(metrics.total)} hint="From the API or fallback data" accent="cyan" />
-          <AdminMetricCard label="Enabled" value={String(metrics.enabled)} hint="Visible in the public UI" accent="emerald" />
-          <AdminMetricCard label="Disabled" value={String(metrics.disabled)} hint="Hidden or reserved" accent="amber" />
+          <AdminMetricCard label="分类总数" value={String(metrics.total)} hint="分类总数统计" accent="cyan" />
+          <AdminMetricCard label="已启用" value={String(metrics.enabled)} hint="前台可见" accent="emerald" />
+          <AdminMetricCard label="已停用" value={String(metrics.disabled)} hint="隐藏或保留" accent="amber" />
         </div>
 
         {loadError ? (
           <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-100">
-            API unavailable. Showing local fallback data: {loadError}
+            数据加载失败: {loadError}
           </div>
         ) : null}
 
@@ -262,8 +262,8 @@ export default function AdminCategoriesPage() {
 
         <div className="grid gap-6 xl:grid-cols-[1.45fr_0.9fr]">
           <AdminPanel
-            title="Category List"
-            description="Basic filtering and row-level sort updates are wired to the real API."
+            title="分类列表"
+            description="分类筛选和排序管理。"
             actions={
               <>
                 <button
@@ -271,20 +271,20 @@ export default function AdminCategoriesPage() {
                   onClick={() => setKeyword("")}
                   type="button"
                 >
-                  Clear Search
+                  清空搜索
                 </button>
                 <button
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200"
                   onClick={() => setStatusFilter("all")}
                   type="button"
                 >
-                  All Status
+                  全部状态
                 </button>
               </>
             }
           >
             <div className="mb-4 grid gap-3 sm:grid-cols-[1.4fr_0.8fr]">
-              <AdminField label="Keyword" hint="Search by name or slug">
+              <AdminField label="关键词" hint="按名称或标识搜索">
                 <input
                   className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
                   placeholder="mail-accounts"
@@ -292,15 +292,15 @@ export default function AdminCategoriesPage() {
                   onChange={(event) => setKeyword(event.target.value)}
                 />
               </AdminField>
-              <AdminField label="Status" hint="Filter the list">
+              <AdminField label="状态" hint="筛选列表">
                 <select
                   className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value as CategoryFilterStatus)}
                 >
-                  <option value="all">All</option>
-                  <option value="enabled">Enabled</option>
-                  <option value="disabled">Disabled</option>
+                  <option value="all">全部</option>
+                  <option value="enabled">已启用</option>
+                  <option value="disabled">已停用</option>
                 </select>
               </AdminField>
             </div>
@@ -309,12 +309,12 @@ export default function AdminCategoriesPage() {
               <table className="min-w-full divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-white/5 text-slate-300">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Category</th>
-                    <th className="px-4 py-3 font-medium">Slug</th>
-                    <th className="px-4 py-3 font-medium">Sort</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Updated</th>
-                    <th className="px-4 py-3 font-medium">Actions</th>
+                    <th className="px-4 py-3 font-medium">分类</th>
+                    <th className="px-4 py-3 font-medium">标识</th>
+                    <th className="px-4 py-3 font-medium">排序</th>
+                    <th className="px-4 py-3 font-medium">状态</th>
+                    <th className="px-4 py-3 font-medium">更新时间</th>
+                    <th className="px-4 py-3 font-medium">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
@@ -376,7 +376,7 @@ export default function AdminCategoriesPage() {
                                 onClick={() => beginEdit(record)}
                                 type="button"
                               >
-                                Edit
+                                编辑
                               </button>
                               <button
                                 className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-50"
@@ -384,7 +384,7 @@ export default function AdminCategoriesPage() {
                                 disabled={busy}
                                 type="button"
                               >
-                                {activeActionId === `status:${record.id}` ? "Updating..." : record.status === 1 ? "Disable" : "Enable"}
+                                {activeActionId === `status:${record.id}` ? "更新中..." : record.status === 1 ? "停用" : "启用"}
                               </button>
                               <button
                                 className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-rose-200 transition hover:border-rose-400/40 hover:bg-rose-400/10 disabled:cursor-not-allowed disabled:opacity-50"
@@ -392,7 +392,7 @@ export default function AdminCategoriesPage() {
                                 disabled={busy}
                                 type="button"
                               >
-                                {activeActionId === `delete:${record.id}` ? "Deleting..." : "Delete"}
+                                {activeActionId === `delete:${record.id}` ? "删除中..." : "删除"}
                               </button>
                             </div>
                           </td>
@@ -402,7 +402,7 @@ export default function AdminCategoriesPage() {
                   ) : (
                     <tr className="bg-slate-950/40">
                       <td className="px-4 py-10 text-center text-sm text-slate-500" colSpan={6}>
-                        No categories match the current filters
+                        当前筛选条件下没有分类
                       </td>
                     </tr>
                   )}
@@ -413,8 +413,8 @@ export default function AdminCategoriesPage() {
 
           <div className="space-y-4">
             <AdminPanel
-              title={editingId ? "Edit Category" : "New Category"}
-              description="The form is connected to the real API. After submit, the list will refresh."
+              title={editingId ? "编辑分类" : "新建分类"}
+              description="分类信息编辑表单,提交后列表会自动刷新。"
               actions={
                 <>
                   <button
@@ -422,7 +422,7 @@ export default function AdminCategoriesPage() {
                     onClick={beginCreate}
                     type="button"
                   >
-                    Clear Form
+                    清空表单
                   </button>
                   {editingId ? (
                     <button
@@ -430,23 +430,23 @@ export default function AdminCategoriesPage() {
                       onClick={beginCreate}
                       type="button"
                     >
-                      Exit Edit
+                      退出编辑
                     </button>
                   ) : null}
                 </>
               }
             >
               <div className="space-y-4">
-                <AdminField label="Name" hint="Category display name" required>
+                <AdminField label="名称" hint="分类显示名称" required>
                   <input
                     className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-                    placeholder="Mail Accounts"
+                    placeholder="邮箱账号"
                     value={formState.name}
                     onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
                   />
                 </AdminField>
 
-                <AdminField label="Slug" hint="Lowercase letters, numbers, and hyphens only" required>
+                <AdminField label="标识" hint="仅小写字母、数字和连字符" required>
                   <input
                     className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
                     placeholder="mail-accounts"
@@ -456,7 +456,7 @@ export default function AdminCategoriesPage() {
                 </AdminField>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <AdminField label="Sort Order" hint="Smaller numbers appear first">
+                  <AdminField label="排序值" hint="数字越小越靠前">
                     <input
                       className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
                       type="number"
@@ -466,25 +466,25 @@ export default function AdminCategoriesPage() {
                     />
                   </AdminField>
 
-                  <AdminField label="Status" hint="Control public visibility">
+                  <AdminField label="状态" hint="控制前台可见性">
                     <select
                       className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
                       value={formState.status}
                       onChange={(event) => setFormState((current) => ({ ...current, status: event.target.value }))}
                     >
-                      <option value="1">Enabled</option>
-                      <option value="0">Disabled</option>
+                      <option value="1">已启用</option>
+                      <option value="0">已停用</option>
                     </select>
                   </AdminField>
                 </div>
 
                 <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-slate-300">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Source</span>
-                    <span className="text-slate-100">{source === "api" ? "API" : "Fallback"}</span>
+                    <span className="text-slate-400">数据源</span>
+                    <span className="text-slate-100">{source === "api" ? "在线" : "离线"}</span>
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Current Status</span>
+                    <span className="text-slate-400">当前状态</span>
                     <span className="text-slate-100">{getCategoryStatusLabel(Number(formState.status) as 0 | 1)}</span>
                   </div>
                 </div>
@@ -496,27 +496,27 @@ export default function AdminCategoriesPage() {
                     disabled={isSaving}
                     type="button"
                   >
-                    {isSaving ? "Saving..." : editingId ? "Update Category" : "Create Category"}
+                    {isSaving ? "保存中..." : editingId ? "更新分类" : "创建分类"}
                   </button>
                   <button
                     className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-white/20 hover:bg-white/10"
                     onClick={beginCreate}
                     type="button"
                   >
-                    Reset
+                    重置
                   </button>
                 </div>
               </div>
             </AdminPanel>
 
-            <AdminPanel title="API Notes" description="This page is wired to the real category endpoints.">
+            <AdminPanel title="功能说明" description="分类管理功能列表。">
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
-                <li>GET /api/categories - load category list.</li>
-                <li>POST /api/categories - create category.</li>
-                <li>PUT /api/categories/{`{id}`} - update category.</li>
-                <li>DELETE /api/categories/{`{id}`} - delete category.</li>
-                <li>PUT /api/categories/{`{id}`}/status - enable or disable category.</li>
-                <li>PUT /api/categories/{`{id}`}/sort - update category sort order.</li>
+                <li>加载分类列表</li>
+                <li>创建分类</li>
+                <li>更新分类</li>
+                <li>删除分类</li>
+                <li>启用或停用分类</li>
+                <li>更新分类排序</li>
               </ul>
             </AdminPanel>
           </div>

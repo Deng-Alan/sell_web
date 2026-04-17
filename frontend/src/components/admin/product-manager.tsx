@@ -143,9 +143,9 @@ export function AdminProductManager() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="Admin / Products"
+          eyebrow="管理后台 / 商品管理"
           title="商品管理"
-          description="列表、筛选、分页、状态切换和编辑入口都已经接到真实商品 DTO，后续可继续补批量操作。"
+          description="管理商品列表、筛选、分页、状态切换和编辑功能。"
           actions={
             <>
               <button
@@ -166,19 +166,19 @@ export function AdminProductManager() {
         />
 
         <div className="grid gap-4 md:grid-cols-4">
-          <AdminMetricCard label="总商品" value={String(totalProducts)} hint="来自分页接口 total 或本地回退总数" accent="cyan" />
-          <AdminMetricCard label="可见商品" value={String(productCountByStatus(products, 1))} hint="status = 1 的商品数量" accent="emerald" />
-          <AdminMetricCard label="推荐商品" value={String(productCountByRecommendation(products, 1))} hint="isRecommended = 1 的商品数量" accent="amber" />
-          <AdminMetricCard label="总库存" value={String(totalStock)} hint="所有商品库存求和" accent="violet" />
+          <AdminMetricCard label="总商品" value={String(totalProducts)} hint="商品总数统计" accent="cyan" />
+          <AdminMetricCard label="可见商品" value={String(productCountByStatus(products, 1))} hint="已上架的商品数量" accent="emerald" />
+          <AdminMetricCard label="推荐商品" value={String(productCountByRecommendation(products, 1))} hint="设为推荐的商品数量" accent="amber" />
+          <AdminMetricCard label="总库存" value={String(totalStock)} hint="所有商品库存总和" accent="violet" />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
           <AdminPanel
             title="商品列表"
-            description="这里优先读取 `/api/products` 和 `/api/categories`，若后端或登录态不可用则回退到本地样例。"
+            description="商品列表展示与管理功能。"
             actions={
               <>
-                <AdminStatusPill status={sourceTag === "api" ? "published" : "pending"} label={sourceTag === "api" ? "API" : "Fallback"} />
+                <AdminStatusPill status={sourceTag === "api" ? "published" : "pending"} label={sourceTag === "api" ? "在线" : "离线"} />
               </>
             }
           >
@@ -191,7 +191,7 @@ export function AdminProductManager() {
                   onChange={(event) => updateFilters({ keyword: event.target.value }, true)}
                 />
               </AdminField>
-              <AdminField label="分类" hint="调用真实分类接口返回的分类列表。">
+              <AdminField label="分类" hint="按商品分类筛选。">
                 <select
                   className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
                   value={filters.categoryId}
@@ -382,7 +382,7 @@ export function AdminProductManager() {
           </AdminPanel>
 
           <div className="space-y-4">
-            <AdminPanel title="接口说明" description="商品管理功能使用的后端接口列表。">
+            <AdminPanel title="功能说明" description="商品管理功能列表。">
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
                 <li>GET /api/products - 读取商品列表。</li>
                 <li>GET /api/categories - 拉取商品分类下拉。</li>
@@ -392,19 +392,19 @@ export function AdminProductManager() {
               </ul>
             </AdminPanel>
 
-            <AdminPanel title="字段说明" description="当前列表展示的字段全部来自后端 ProductResponse。">
+            <AdminPanel title="信息说明" description="当前列表展示的信息。">
               <div className="grid gap-4">
-                <AdminField label="基础字段" hint="id、categoryId、categoryName、contactId、contactName、name">
+                <AdminField label="基础信息" hint="id、categoryId、categoryName、contactId、contactName、name">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
                     name / categoryId / contactId / name
                   </div>
                 </AdminField>
-                <AdminField label="展示字段" hint="coverImage、shortDesc、content、price、originalPrice、stock">
+                <AdminField label="展示信息" hint="coverImage、shortDesc、content、price、originalPrice、stock">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
                     coverImage / shortDesc / content / price / originalPrice / stock
                   </div>
                 </AdminField>
-                <AdminField label="状态字段" hint="isRecommended、sortOrder、status、imageUrls">
+                <AdminField label="状态信息" hint="isRecommended、sortOrder、status、imageUrls">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
                     isRecommended / sortOrder / status / imageUrls
                   </div>

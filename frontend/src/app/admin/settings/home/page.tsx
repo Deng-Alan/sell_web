@@ -106,7 +106,7 @@ function SectionEditorCard({
       }
     >
       <div className="grid gap-4 lg:grid-cols-2">
-        <AdminField label="sectionKey" hint="保存时会调用 PUT /api/home-sections/{sectionKey}" required className="lg:col-span-2">
+        <AdminField label="sectionKey" hint="区块唯一标识" required className="lg:col-span-2">
           {readonlyKey ? (
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-200">
               {sectionKey}
@@ -310,12 +310,12 @@ export default function AdminHomeSettingsPage() {
         if (nextSnapshot.errors.length > 0) {
           setNotice({
             tone: "warning",
-            message: `已部分读取真实接口：${nextSnapshot.errors.join("；")}`
+            message: `部分数据加载失败：${nextSnapshot.errors.join("；")}`
           });
         } else {
           setNotice({
             tone: "success",
-            message: "首页配置已从真实接口读取"
+            message: "首页配置已加载"
           });
         }
       }
@@ -392,7 +392,7 @@ export default function AdminHomeSettingsPage() {
 
   const previewFields = useMemo(
     () => [
-      { label: "读取来源", value: sourceLabel === "api" ? "API" : sourceLabel === "partial" ? "Partial" : "Fallback" },
+      { label: "读取来源", value: sourceLabel === "api" ? "在线" : sourceLabel === "partial" ? "部分" : "离线" },
       { label: "站点设置", value: String(snapshot?.siteSettings.length ?? 0) },
       { label: "首页区块", value: String(sections.length) },
       { label: "已启用", value: String(enabledSections) }
@@ -404,9 +404,9 @@ export default function AdminHomeSettingsPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="Admin / Settings / Home"
-          title="首页配置真实联调"
-          description="这里直接对接站点设置与首页区块两个后端接口，支持读取、编辑、保存和错误提示，后续可以继续扩展更多首页模块。"
+          eyebrow="管理后台 / 站点设置 / 首页配置"
+          title="首页配置"
+          description="管理站点设置与首页区块,支持读取、编辑和保存。"
           actions={
             <>
               <button
@@ -431,14 +431,14 @@ export default function AdminHomeSettingsPage() {
 
         <div className="grid gap-4 md:grid-cols-4">
           {previewFields.map((field) => (
-            <AdminMetricCard key={field.label} label={field.label} value={field.value} hint="真实接口读取状态和数量统计" accent="cyan" />
+            <AdminMetricCard key={field.label} label={field.label} value={field.value} hint="配置状态和数量统计" accent="cyan" />
           ))}
         </div>
 
         {renderNotice(notice)}
 
         {loading && snapshot == null ? (
-          <AdminPanel title="加载中" description="正在读取真实的站点设置和首页区块数据。">
+          <AdminPanel title="加载中" description="正在读取站点设置和首页区块数据。">
             <div className="space-y-3 text-sm text-slate-400">
               <div className="h-4 w-1/3 rounded-full bg-white/5" />
               <div className="h-4 w-2/3 rounded-full bg-white/5" />
@@ -507,7 +507,7 @@ export default function AdminHomeSettingsPage() {
 
             <SectionEditorCard
               title="新增 / 更新区块"
-              hint="使用同一个 sectionKey 反复保存即可更新，后端会走 upsert。"
+              hint="使用同一个 sectionKey 反复保存即可更新。"
               sectionKey={newSectionKey}
               draft={newSectionDraft}
               onSectionKeyChange={setNewSectionKey}
@@ -518,11 +518,11 @@ export default function AdminHomeSettingsPage() {
 
             <AdminPanel
               title="首页区块列表"
-              description="区块列表直接读取 /api/home-sections，下面每一项都可以单独保存。"
+              description="首页区块列表,每一项都可以单独保存。"
               actions={
                 <AdminStatusPill
                   status={sourcePill}
-                  label={sourceLabel === "api" ? "API" : sourceLabel === "partial" ? "PARTIAL" : "FALLBACK"}
+                  label={sourceLabel === "api" ? "在线" : sourceLabel === "partial" ? "部分" : "离线"}
                 />
               }
             >
@@ -560,16 +560,16 @@ export default function AdminHomeSettingsPage() {
           </div>
 
           <div className="space-y-6">
-            <AdminPanel title="写入规则" description="这次联调只对接两个真实接口族，页面上的表单值会直接写回后端。">
+            <AdminPanel title="写入规则" description="页面表单值会保存。">
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
-                <li>站点设置优先使用 GET /api/site-settings?groupName=home 和 PUT /api/site-settings/groups/home。</li>
-                <li>首页区块优先使用 GET /api/home-sections 和 PUT /api/home-sections/{`{sectionKey}` }。</li>
-                <li>页面会自动带上当前管理员登录态 token，不需要改通用 API 文件。</li>
-                <li>保存失败时会保留当前草稿内容，方便继续调整后再提交。</li>
+                <li>站点设置保存到 home 配置组。</li>
+                <li>首页区块保存到对应的区块配置。</li>
+                <li>页面会自动带上当前管理员登录态。</li>
+                <li>保存失败时会保留当前未保存内容，方便继续调整后再提交。</li>
               </ul>
             </AdminPanel>
 
-            <AdminPanel title="当前草稿映射" description="这些字段会直接提交到 groupName=home 的站点设置。">
+            <AdminPanel title="当前未保存内容" description="这些内容会直接提交到 groupName=home 的站点设置。">
               <div className="space-y-3 text-sm leading-6 text-slate-300">
                 {homeSettingGroups.map((group) => (
                   <div key={group.title} className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">

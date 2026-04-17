@@ -156,7 +156,7 @@ export default function AdminContactsPage() {
       try {
         await refreshContacts(null);
         if (!cancelled) {
-          setNotice({ kind: "info", message: "联系人列表已加载真实接口数据。" });
+          setNotice({ kind: "info", message: "联系人列表已加载。" });
         }
       } catch (exception) {
         if (!cancelled) {
@@ -306,9 +306,9 @@ export default function AdminContactsPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="Admin / Contacts"
-          title="联系方式管理真实联调"
-          description="真实读取并维护联系方式渠道，支持筛选、创建、编辑、删除、启停和排序更新。"
+          eyebrow="管理后台 / 联系方式"
+          title="联系方式管理"
+          description="管理联系方式渠道，支持筛选、创建、编辑、删除、启停和排序。"
           actions={
             <>
               <button
@@ -330,7 +330,7 @@ export default function AdminContactsPage() {
         />
 
         <div className="grid gap-4 md:grid-cols-4">
-          <AdminMetricCard label="渠道总数" value={String(metrics.total)} hint="来自 /api/contacts 的真实结果" accent="cyan" />
+          <AdminMetricCard label="渠道总数" value={String(metrics.total)} hint="联系方式渠道总数" accent="cyan" />
           <AdminMetricCard label="已启用" value={String(metrics.enabled)} hint="status = 1 的渠道数量" accent="emerald" />
           <AdminMetricCard label="已停用" value={String(metrics.disabled)} hint="status = 0 的渠道数量" accent="amber" />
           <AdminMetricCard label="待确认" value={String(metrics.pending)} hint="status 为空时的兼容统计" accent="violet" />
@@ -360,7 +360,7 @@ export default function AdminContactsPage() {
         <div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
           <AdminPanel
             title="联系人列表"
-            description="前台会读取这张真实表，筛选条件仅影响当前页面显示，不改动后端数据。"
+            description="联系方式列表展示与筛选。"
             actions={
               <>
                 <button
@@ -448,7 +448,7 @@ export default function AdminContactsPage() {
                   {loading ? (
                     <tr>
                       <td className="px-4 py-8 text-center text-slate-400" colSpan={7}>
-                        正在加载真实联系人数据...
+                        正在加载联系人数据...
                       </td>
                     </tr>
                   ) : filteredContacts.length === 0 ? (
@@ -554,11 +554,11 @@ export default function AdminContactsPage() {
           <div className="space-y-4">
             <AdminPanel
               title={editingId == null ? "新建联系人" : `编辑联系人 #${editingId}`}
-              description="先把表单字段和接口对齐，保存后会立即回刷列表。"
+              description="联系人信息编辑表单,保存后会立即刷新列表。"
             >
               <form className="grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <AdminField label="类型" required hint="与后端 ContactRequest.type 对齐">
+                  <AdminField label="类型" required hint="选择联系方式类型">
                     <select
                       value={formState.type}
                       onChange={(event) => handleFormChange("type", event.target.value)}
@@ -731,7 +731,7 @@ export default function AdminContactsPage() {
                   <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-4">
                     <p className="text-sm text-slate-400">类型</p>
                     <p className="mt-2 text-lg font-semibold text-white">{selectedPreview.type}</p>
-                    <p className="mt-2 text-xs text-slate-500">实际保存字段：type / name / value / qrImage / jumpUrl / displayPlaces / sortOrder / status</p>
+                    <p className="mt-2 text-xs text-slate-500">实际保存内容：type / name / value / qrImage / jumpUrl / displayPlaces / sortOrder / status</p>
                   </div>
                   <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-4">
                     <p className="text-sm text-slate-400">二维码预览</p>

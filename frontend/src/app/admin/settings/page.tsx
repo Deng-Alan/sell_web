@@ -11,11 +11,6 @@ const settingsRoutes = [
     description: "管理首屏文案、Banner、模块开关和公告。"
   },
   {
-    title: "SEO 配置",
-    href: "/admin/settings/seo",
-    description: "维护标题模板、描述模板和索引规则。"
-  },
-  {
     title: "联系方式",
     href: "/admin/contacts",
     description: "处理微信、QQ、二维码和外链入口。"
@@ -32,30 +27,24 @@ export default function AdminSettingsPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="Admin / Settings"
+          eyebrow="管理后台 / 站点设置"
           title="站点设置中心"
           description="这里集中管理首页配置、SEO 配置以及站点级维护入口。"
           actions={
             <>
               <a
                 href="/admin/settings/home"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition-colors hover:bg-white/10"
-              >
-                首页设置
-              </a>
-              <a
-                href="/admin/settings/seo"
                 className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 transition-colors hover:bg-cyan-400/15"
               >
-                SEO 设置
+                首页设置
               </a>
             </>
           }
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <AdminMetricCard label="核心设置页" value="2" hint="首页配置与 SEO 配置作为主要站点设置入口。" accent="cyan" />
-          <AdminMetricCard label="关联模块" value="4" hint="商品、联系方式、首页内容和搜索规则都受这里影响。" accent="emerald" />
+          <AdminMetricCard label="核心设置页" value="1" hint="首页配置作为主要站点设置入口。" accent="cyan" />
+          <AdminMetricCard label="关联模块" value="3" hint="商品、联系方式、首页内容都受这里影响。" accent="emerald" />
           <AdminMetricCard label="配置方式" value="集中维护" hint="统一通过后台设置页面进行维护和保存。" accent="amber" />
           <AdminMetricCard label="当前状态" value="可操作" hint="已经可以进入细分配置页继续维护。" accent="violet" />
         </div>
@@ -81,7 +70,7 @@ export default function AdminSettingsPage() {
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-medium text-white">{item.title}</p>
                       <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-400 group-hover:text-cyan-100">
-                        Open
+                        进入
                       </span>
                     </div>
                     <p className="text-sm leading-6 text-slate-400">{item.description}</p>
@@ -92,14 +81,14 @@ export default function AdminSettingsPage() {
           </AdminPanel>
 
           <div className="space-y-4">
-            <AdminPanel title="全局参数" description="先把最常用的站点级字段位点摆出来，后面可以直接接保存接口。">
+            <AdminPanel title="全局参数" description="常用的站点级字段配置。">
               <div className="grid gap-4">
                 <AdminField label="站点名称" hint="显示在后台标题和对外网站标题中。">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
                     Sell Web
                   </div>
                 </AdminField>
-                <AdminField label="主域名" hint="用于生成 canonical 和站点链接。">
+                <AdminField label="主域名" hint="用于生成网站链接。">
                   <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-500">
                     https://example.com
                   </div>
@@ -124,7 +113,7 @@ export default function AdminSettingsPage() {
 
             <AdminPanel title="使用说明" description="设置中心作为站点管理入口，后续新增站点级能力也继续挂在这里。">
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
-                <li>1. 首页设置和 SEO 设置保持独立页面，便于持续维护。</li>
+                <li>1. 首页设置保持独立页面，便于持续维护。</li>
                 <li>2. 商品和联系方式模块的展示结果，会直接影响前台页面表现。</li>
                 <li>3. 后续新增公告、支付或运营配置时，可以继续挂到这里。</li>
               </ul>
