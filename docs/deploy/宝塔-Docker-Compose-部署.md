@@ -46,6 +46,7 @@ cp .env.production.example .env.production
 
 ```env
 APP_DOMAIN=emailcc.cn
+APP_PATH=/root/sell_web
 POSTGRES_DB=sell_web
 POSTGRES_USER=sellweb
 POSTGRES_PASSWORD=sw_pg_5mYh7Pq9Lx2Nf8Kc4Vt1Ra6Z
@@ -59,6 +60,7 @@ INTERNAL_API_BASE_URL=http://backend:8080/api
 
 说明：
 
+- `APP_PATH` 必须是服务器上的项目绝对路径；如果你用宝塔编排页面，这是关键项
 - `NEXT_PUBLIC_API_BASE_URL` 给浏览器使用，必须是公网可访问地址
 - `INTERNAL_API_BASE_URL` 给 Next.js 服务端渲染使用，必须是容器内地址
 - `JPA_DDL_AUTO=validate`，避免生产环境自动改表
@@ -95,6 +97,14 @@ docker compose --env-file .env.production -f docker-compose.prod.yml logs -f pos
 ```
 
 ## 5. 宝塔站点配置
+
+如果你坚持使用宝塔 Docker 的“容器编排”页面，不要直接依赖 `./frontend` / `./backend` 这种相对路径。当前仓库已经改成读取 `APP_PATH`，所以在宝塔编排页面的 `.env` 内容里必须填写真实绝对路径，例如：
+
+```env
+APP_PATH=/root/sell_web
+```
+
+如果你的仓库不在 `/root/sell_web`，这里必须改成实际路径。
 
 先在宝塔创建站点：
 

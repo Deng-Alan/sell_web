@@ -17,7 +17,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ${APP_PATH:-.}/backend
     container_name: sellweb-backend
     restart: unless-stopped
     depends_on:
@@ -43,7 +43,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ${APP_PATH:-.}/frontend
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
         INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL}
