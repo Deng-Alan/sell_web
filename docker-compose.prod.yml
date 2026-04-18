@@ -1,21 +1,4 @@
 services:
-  nginx:
-    build:
-      context: ./deploy/nginx
-    container_name: sellweb-nginx
-    restart: unless-stopped
-    depends_on:
-      - frontend
-      - backend
-    environment:
-      APP_DOMAIN: ${APP_DOMAIN}
-      ENABLE_SSL: ${ENABLE_SSL}
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./deploy/nginx/certs:/etc/nginx/certs:ro
-
   postgres:
     image: postgres:16-alpine
     container_name: sellweb-postgres
@@ -53,8 +36,8 @@ services:
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
       UPLOAD_BASE_DIR: /app/uploads
       UPLOAD_PUBLIC_PREFIX: /api/admin/uploads/files
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
     volumes:
       - upload_data:/app/uploads
 
@@ -72,8 +55,8 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
       INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL}
-    expose:
-      - "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
 
 volumes:
   postgres_data:
