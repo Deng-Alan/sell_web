@@ -1,4 +1,5 @@
 import { getStoredAdminAuthToken } from "@/lib/auth";
+import { joinApiPath } from "@/lib/api-base";
 import type { ApiListResponse, ApiResponse } from "@/types/api";
 import type {
   AdminCategoryRecord,
@@ -8,12 +9,7 @@ import type {
   AdminProductUpsertInput
 } from "@/types/catalog";
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
 const adminTokenStorageKeys = ["sell_web_admin_token", "sell-web-admin-token", "admin_token"] as const;
-
-function joinPath(path: string) {
-  return `${apiBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
 
 function toQueryString(params?: Record<string, string | number | boolean | undefined>) {
   if (!params) {
@@ -71,17 +67,23 @@ function buildHeaders(init?: RequestInit) {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(joinPath(path), {
-    ...init,
-    headers: buildHeaders(init),
-    cache: "no-store"
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(joinApiPath(path), {
+      ...init,
+      headers: buildHeaders(init),
+      cache: "no-store"
+    });
+  } catch {
+    throw new Error("无法连接后端服务，请确认 Spring Boot 服务已启动。");
+  }
 
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
     const message = payload && typeof payload === "object" && "message" in payload ? String((payload as { message?: string | null }).message ?? "") : "";
-    throw new Error(message || `API request failed: ${response.status}`);
+    throw new Error(message || `接口请求失败（${response.status}）`);
   }
 
   return payload as T;
@@ -133,52 +135,52 @@ export type AdminCatalogApi = {
 export const adminCatalogApi: AdminCatalogApi = {
   async listCategories() {
     const response = await apiFetch<ApiResponse<AdminCategoryRecord[]>>("/categories");
-    return unwrapApiResponse(response, "Failed to load categories");
+    return unwrapApiResponse(response, "分类加载失败");
   },
   async listContacts() {
     const response = await apiFetch<ApiResponse<AdminContactRecord[]>>("/contacts");
-    return unwrapApiResponse(response, "Failed to load contacts");
+    return unwrapApiResponse(response, "联系人加载失败");
   },
   async listProducts(query) {
     const response = await apiFetch<ApiResponse<AdminProductRecord[] | ApiListResponse<AdminProductRecord>>>(
       `/products${toQueryString(query)}`
     );
-    return unwrapApiListResponse(response, "Failed to load products");
+    return unwrapApiListResponse(response, "商品加载失败");
   },
   async getProduct(id) {
     const response = await apiFetch<ApiResponse<AdminProductRecord>>(`/products/${id}`);
-    return unwrapApiResponse(response, "Failed to load product");
+    return unwrapApiResponse(response, "商品详情加载失败");
   },
   async createProduct(input) {
     const response = await apiFetch<ApiResponse<AdminProductRecord>>("/products", {
       method: "POST",
       body: JSON.stringify(input)
     });
-    return unwrapApiResponse(response, "Failed to create product");
+    return unwrapApiResponse(response, "商品创建失败");
   },
   async updateProduct(id, input) {
     const response = await apiFetch<ApiResponse<AdminProductRecord>>(`/products/${id}`, {
       method: "PUT",
       body: JSON.stringify(input)
     });
-    return unwrapApiResponse(response, "Failed to update product");
+    return unwrapApiResponse(response, "商品更新失败");
   },
   async deleteProduct(id) {
     const response = await apiFetch<ApiResponse<void>>(`/products/${id}`, { method: "DELETE" });
-    unwrapApiResponse(response, "Failed to delete product");
+    unwrapApiResponse(response, "商品删除失败");
   },
   async updateProductStatus(id, status) {
     const response = await apiFetch<ApiResponse<AdminProductRecord>>(`/products/${id}/status`, {
       method: "PUT",
       body: JSON.stringify({ status })
     });
-    return unwrapApiResponse(response, "Failed to update product status");
+    return unwrapApiResponse(response, "商品状态更新失败");
   },
   async updateProductRecommended(id, isRecommended) {
     const response = await apiFetch<ApiResponse<AdminProductRecord>>(`/products/${id}/recommended`, {
       method: "PUT",
       body: JSON.stringify({ isRecommended })
     });
-    return unwrapApiResponse(response, "Failed to update product recommendation");
+    return unwrapApiResponse(response, "商品推荐状态更新失败");
   }
 };

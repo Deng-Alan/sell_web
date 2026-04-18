@@ -1,12 +1,8 @@
 import type { AdminAuthSession, AdminLoginRequest, AdminLoginResponse } from "@/types/auth";
+import { joinApiPath } from "@/lib/api-base";
 import type { ApiResponse } from "@/types/api";
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
 const adminAuthStorageKey = "sell-web-admin-auth";
-
-function joinPath(path: string) {
-  return `${apiBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
 
 function canUseStorage() {
   return typeof window !== "undefined";
@@ -23,7 +19,19 @@ function readStorage(storage: Storage | undefined) {
   }
 
   try {
-    return JSON.parse(value) as AdminAuthSession;
+    const session = JSON.parse(value) as Partial<AdminAuthSession>;
+
+    if (!session?.token || !session.username) {
+      return null;
+    }
+
+    return {
+      token: session.token,
+      username: session.username,
+      nickname: session.nickname ?? session.username,
+      loginAt: session.loginAt ?? new Date(0).toISOString(),
+      rememberMe: Boolean(session.rememberMe)
+    } satisfies AdminAuthSession;
   } catch {
     return null;
   }
@@ -53,6 +61,10 @@ export function getStoredAdminAuth(): AdminAuthSession | null {
 
 export function getStoredAdminAuthToken() {
   return getStoredAdminAuth()?.token ?? null;
+}
+
+export function hasStoredAdminAuthToken() {
+  return Boolean(getStoredAdminAuthToken());
 }
 
 export function getStoredAdminProfile() {
@@ -98,15 +110,37 @@ export function getStoredAdminAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+export async function logoutAdmin() {
+  try {
+    await fetch(joinApiPath("/auth/logout"), {
+      method: "POST",
+      headers: {
+        ...getStoredAdminAuthHeaders()
+      },
+      cache: "no-store"
+    });
+  } catch {
+    // noop
+  } finally {
+    clearStoredAdminAuth();
+  }
+}
+
 export async function loginAdmin(input: AdminLoginRequest, rememberMe: boolean) {
-  const response = await fetch(joinPath("/auth/login"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    cache: "no-store",
-    body: JSON.stringify(input)
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(joinApiPath("/auth/login"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      cache: "no-store",
+      body: JSON.stringify(input)
+    });
+  } catch {
+    throw new Error("无法连接后端服务，请确认 Spring Boot 服务已启动。");
+  }
 
   const payload = await parseJsonResponse<ApiResponse<AdminLoginResponse>>(response);
 

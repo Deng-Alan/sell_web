@@ -16,6 +16,9 @@ backend/.env
 .env.local
 .env.*.local
 frontend/.env.local
+.env.production
+frontend/.env.production
+backend/.env.production
 
 # IDE
 .vscode/
@@ -25,6 +28,8 @@ frontend/.env.local
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS
 .DS_Store
@@ -32,6 +37,8 @@ Thumbs.db
 
 # Uploads
 uploads/
+deploy/nginx/certs/*
+!deploy/nginx/certs/.gitkeep
 
 # Claude session files
 .claude/loop-execution-*.log

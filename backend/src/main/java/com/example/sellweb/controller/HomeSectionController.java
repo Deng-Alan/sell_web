@@ -6,6 +6,7 @@ import com.example.sellweb.dto.home.HomeSectionResponse;
 import com.example.sellweb.service.HomeSectionService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,5 +44,11 @@ public class HomeSectionController {
             @PathVariable String sectionKey,
             @Valid @RequestBody HomeSectionRequest request) {
         return ResponseEntity.ok(ApiResponse.success("首页区块保存成功", homeSectionService.upsertSection(sectionKey, request)));
+    }
+
+    @DeleteMapping("/{sectionKey}")
+    public ResponseEntity<ApiResponse<Void>> deleteSection(@PathVariable String sectionKey) {
+        homeSectionService.deleteSection(sectionKey);
+        return ResponseEntity.ok(ApiResponse.success("首页区块删除成功", null));
     }
 }

@@ -2,7 +2,6 @@ package com.example.sellweb.service;
 
 import com.example.sellweb.dto.LoginRequest;
 import com.example.sellweb.dto.LoginResponse;
-import com.example.sellweb.dto.auth.ChangePasswordRequest;
 import com.example.sellweb.entity.AdminUser;
 import com.example.sellweb.repository.AdminUserRepository;
 import com.example.sellweb.security.JwtUtils;
@@ -81,23 +80,6 @@ public class AuthService {
     @Transactional
     public void logout(Authentication authentication) {
         AdminUser user = requireAuthenticatedUser(authentication);
-        user.setTokenVersion(user.getTokenVersion() + 1);
-        adminUserRepository.save(user);
-    }
-
-    @Transactional
-    public void changePassword(Authentication authentication, ChangePasswordRequest request) {
-        AdminUser user = requireAuthenticatedUser(authentication);
-
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("当前密码不正确");
-        }
-
-        if (request.getCurrentPassword().equals(request.getNewPassword())) {
-            throw new IllegalArgumentException("新密码不能与当前密码相同");
-        }
-
-        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setTokenVersion(user.getTokenVersion() + 1);
         adminUserRepository.save(user);
     }

@@ -87,6 +87,12 @@ public class HomeSectionService {
         return toResponse(homeSectionRepository.save(section));
     }
 
+    public void deleteSection(String sectionKey) {
+        HomeSection section = findSectionOrThrow(sectionKey);
+        homeSectionRepository.delete(section);
+        homeSectionRepository.flush();
+    }
+
     private HomeSection findSectionOrThrow(String sectionKey) {
         validateSectionKey(sectionKey);
         return homeSectionRepository.findBySectionKey(sectionKey.trim())

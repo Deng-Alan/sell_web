@@ -22,12 +22,59 @@ function buildProductMetadata(product: ShowcaseProductDetail, id: string): Metad
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const { product } = await loadPublicProductPage(id);
+  if (!product) {
+    return {
+      title: "商品暂时不可用 | 商品展示",
+      description: "当前无法获取该商品详情，请稍后重试。"
+    };
+  }
+
   return buildProductMetadata(product, id);
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = await params;
-  const { product, relatedProducts } = await loadPublicProductPage(id);
+  const { product, relatedProducts, source } = await loadPublicProductPage(id);
+
+  if (!product) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(169,79,29,0.08),transparent_24%),linear-gradient(180deg,#fff8ef_0%,#f4ecdf_100%)]">
+        <section className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+            <Link href="/" className="transition hover:text-[var(--accent)]">
+              首页
+            </Link>
+            <span>/</span>
+            <span className="text-[var(--ink)]">商品详情</span>
+          </div>
+
+          <section className="rounded-[2rem] border border-[var(--line)] bg-white px-6 py-12 text-center shadow-[0_18px_60px_rgba(16,16,16,0.08)] sm:px-8">
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Unavailable</p>
+            <h1 className="mt-3 text-3xl font-semibold text-[var(--ink)]">商品详情暂时不可用</h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+              {source === "fallback"
+                ? "当前无法连接后端服务，请确认服务已启动后再访问商品详情。"
+                : "未找到对应商品，可能已下架或链接已失效。"}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/"
+                className="rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                返回商品列表
+              </Link>
+              <Link
+                href="/contact"
+                className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#1d1d1d]"
+              >
+                联系我们
+              </Link>
+            </div>
+          </section>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(169,79,29,0.08),transparent_24%),linear-gradient(180deg,#fff8ef_0%,#f4ecdf_100%)]">
@@ -46,7 +93,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               className="relative overflow-hidden px-5 py-6 text-white sm:px-8 sm:py-8 lg:px-10 lg:py-10"
               style={{ backgroundImage: product.coverTone }}
             >
+              {product.coverImage ? (
+                <img
+                  src={product.coverImage}
+                  alt={product.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : null}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(169,79,29,0.26),transparent_30%)]" />
+              <div className="absolute inset-0 bg-black/28" />
               <div className="relative flex h-full flex-col gap-6">
                 <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.28em] text-white/78">
                   <span>{product.categoryName}</span>
@@ -70,9 +125,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
                     <p className="text-xs uppercase tracking-[0.25em] text-white/60">封面图片</p>
-                    <p className="mt-2 text-sm leading-6 text-white/85">
-                      {product.coverImage ? "已配置商品封面图片" : "使用默认渐变背景"}
-                    </p>
+                    {product.coverImage ? (
+                      <div className="mt-3 overflow-hidden rounded-2xl border border-white/10">
+                        <img src={product.coverImage} alt={product.name} className="h-40 w-full object-cover" />
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm leading-6 text-white/85">使用默认渐变背景</p>
+                    )}
                   </div>
                   <div className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
                     <p className="text-xs uppercase tracking-[0.25em] text-white/60">联系</p>
@@ -119,6 +178,19 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   </Link>
                 </div>
               </div>
+
+              {product.galleryUrls.length > 0 ? (
+                <div className="rounded-[1.6rem] border border-[var(--line)] bg-white p-5">
+                  <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">Gallery</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    {product.galleryUrls.map((imageUrl) => (
+                      <div key={imageUrl} className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[rgba(255,249,241,0.96)]">
+                        <img src={imageUrl} alt={product.name} className="h-28 w-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </aside>
           </div>
         </section>

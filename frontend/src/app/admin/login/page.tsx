@@ -84,17 +84,17 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020617_0%,#0f172a_100%)] px-4 py-10 sm:px-6 lg:px-8">
+    <main className="admin-app min-h-screen bg-slate-100 px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-lg items-center justify-center">
-        <section className="w-full rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-2xl shadow-black/30 ring-1 ring-white/5 sm:p-8">
+        <section className="w-full rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.12)] sm:p-8">
           <div className="space-y-3 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-300/90">Admin / Login</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">后台登录</h1>
-            <p className="text-sm leading-6 text-slate-400">请输入管理员账号与密码进入后台管理系统。</p>
+            <p className="admin-kicker">Admin Login</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">后台登录</h1>
+            <p className="text-sm leading-6 text-slate-500">请输入管理员账号与密码进入后台管理系统。</p>
           </div>
 
           <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
               账号
               <input
                 type="text"
@@ -102,11 +102,11 @@ export default function AdminLoginPage() {
                 value={form.username}
                 onChange={(event) => updateField("username", event.target.value)}
                 placeholder="admin"
-                className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
+                className="admin-input"
               />
             </label>
 
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
               密码
               <input
                 type="password"
@@ -114,16 +114,16 @@ export default function AdminLoginPage() {
                 value={form.password}
                 onChange={(event) => updateField("password", event.target.value)}
                 placeholder="请输入密码"
-                className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
+                className="admin-input"
               />
             </label>
 
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-300">
+            <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
               <input
                 type="checkbox"
                 checked={form.rememberMe}
                 onChange={(event) => updateField("rememberMe", event.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-slate-950 text-cyan-400"
+                className="h-4 w-4 rounded border-slate-300 text-blue-600"
               />
               <span>保持登录</span>
             </label>
@@ -133,8 +133,8 @@ export default function AdminLoginPage() {
                 className={[
                   "rounded-2xl border px-4 py-3 text-sm",
                   errorMessage
-                    ? "border-rose-400/30 bg-rose-400/10 text-rose-100"
-                    : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
+                    ? "border-rose-200 bg-rose-50 text-rose-700"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-700"
                 ].join(" ")}
                 aria-live="polite"
               >
@@ -146,17 +146,15 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full rounded-full border border-cyan-400/30 bg-cyan-400 px-5 py-3 text-sm font-medium text-slate-950 transition-colors hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+                className="admin-button-primary w-full py-3"
               >
                 {isSubmitting ? "登录中..." : "进入后台"}
               </button>
-              <button
-                type="button"
-                onClick={handleClearAuth}
-                className="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-200 transition-colors hover:bg-white/10"
-              >
-                清除登录态
-              </button>
+              {storedAuth ? (
+                <button type="button" onClick={handleClearAuth} className="admin-button-secondary w-full py-3">
+                  清除已保存登录态
+                </button>
+              ) : null}
             </div>
           </form>
         </section>

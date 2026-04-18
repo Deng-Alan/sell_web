@@ -19,7 +19,17 @@ import java.util.stream.Collectors;
 @Transactional
 public class ContactService {
 
-    private static final Set<String> ALLOWED_TYPES = Set.of("wechat", "qq", "phone", "email", "website", "other");
+    private static final Set<String> ALLOWED_TYPES = Set.of(
+            "wechat",
+            "qq",
+            "phone",
+            "email",
+            "website",
+            "telegram",
+            "qr",
+            "link",
+            "other"
+    );
 
     private final ContactRepository contactRepository;
 
@@ -163,7 +173,7 @@ public class ContactService {
         }
 
         if (!ALLOWED_TYPES.contains(type.trim().toLowerCase())) {
-            throw new IllegalArgumentException("类型无效，必须为 wechat/qq/phone/email/website/other");
+            throw new IllegalArgumentException("类型无效，必须为 wechat/qq/phone/email/website/telegram/qr/link/other");
         }
     }
 

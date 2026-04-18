@@ -13,10 +13,6 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const catalog = await loadPublicCatalog();
 
-  // 找到二维码联系方式
-  const qrContact = catalog.contacts.find((c) => c.type === "qr");
-  const qrHref = qrContact?.href || "#";
-
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(169,79,29,0.08),transparent_24%),linear-gradient(180deg,#fff8ef_0%,#f5ede1_100%)] px-4 py-10 sm:px-6 lg:px-8">
       <section className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -37,25 +33,37 @@ export default async function ContactPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {catalog.contacts.map((contact) => {
-            // 除了邮箱外,其他都指向二维码
-            const buttonHref = contact.type === "email" ? contact.href : qrHref;
-
-            return (
-              <a
-                key={contact.id}
-                href={buttonHref}
-                className="group rounded-[1.8rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
-              >
-                <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">{contact.label}</p>
-                <p className="mt-3 text-lg font-semibold text-[var(--ink)]">{contact.value}</p>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
-                <span className="mt-5 inline-flex rounded-full border border-[var(--line)] px-3 py-1 text-xs font-medium text-[var(--ink)] transition group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
-                  立即前往
-                </span>
-              </a>
-            );
-          })}
+          {catalog.contacts.length > 0 ? (
+            catalog.contacts.map((contact) => {
+              return (
+                <a
+                  key={contact.id}
+                  id={`contact-${contact.id}`}
+                  href={contact.href}
+                  className="group rounded-[1.8rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
+                >
+                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">{contact.label}</p>
+                  <p className="mt-3 text-lg font-semibold text-[var(--ink)]">{contact.value}</p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
+                  {contact.qrImage ? (
+                    <div className="mt-4 overflow-hidden rounded-[1.4rem] border border-[var(--line)] bg-[rgba(255,249,241,0.92)]">
+                      <img src={contact.qrImage} alt={contact.label} className="h-40 w-full object-cover" />
+                    </div>
+                  ) : null}
+                  <span className="mt-5 inline-flex rounded-full border border-[var(--line)] px-3 py-1 text-xs font-medium text-[var(--ink)] transition group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
+                    立即前往
+                  </span>
+                </a>
+              );
+            })
+          ) : (
+            <div className="rounded-[1.8rem] border border-dashed border-[var(--line)] bg-white px-6 py-12 text-center md:col-span-2 xl:col-span-4">
+              <p className="text-lg font-semibold text-[var(--ink)]">联系方式暂未开放</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                当前无法获取联系方式，请确认后端服务已启动，或稍后刷新页面重试。
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </main>

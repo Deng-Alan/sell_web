@@ -4,22 +4,22 @@ type AdminStatusPillProps = {
 };
 
 const statusClasses: Record<string, string> = {
-  enabled: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  disabled: "border-slate-500/30 bg-slate-500/10 text-slate-300",
-  draft: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-  published: "border-cyan-400/30 bg-cyan-400/10 text-cyan-200",
-  archived: "border-rose-400/30 bg-rose-400/10 text-rose-200",
-  pending: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-  indexed: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  noindex: "border-rose-400/30 bg-rose-400/10 text-rose-200"
+  enabled: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  disabled: "border-slate-200 bg-slate-100 text-slate-600",
+  draft: "border-amber-200 bg-amber-50 text-amber-700",
+  published: "border-blue-200 bg-blue-50 text-blue-700",
+  archived: "border-rose-200 bg-rose-50 text-rose-700",
+  pending: "border-amber-200 bg-amber-50 text-amber-700",
+  indexed: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  noindex: "border-rose-200 bg-rose-50 text-rose-700"
 };
 
 export function AdminStatusPill({ status, label }: AdminStatusPillProps) {
   return (
     <span
       className={[
-        "inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]",
-        statusClasses[status] ?? "border-white/10 bg-white/5 text-slate-200"
+        "inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em]",
+        statusClasses[status] ?? "border-slate-200 bg-slate-100 text-slate-600"
       ].join(" ")}
     >
       {label ?? status}

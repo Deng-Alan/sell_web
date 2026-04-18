@@ -3,7 +3,7 @@ import type { ApiResponse } from "@/types/api";
 
 export type ContactStatusValue = 0 | 1;
 
-export type ContactTypeValue = "wechat" | "qq" | "telegram" | "email" | "qr" | "link" | string;
+export type ContactTypeValue = "wechat" | "qq" | "phone" | "email" | "website" | "telegram" | "qr" | "link" | "other" | string;
 
 export type ContactRecord = {
   id: number;
@@ -135,14 +135,20 @@ export function formatContactType(type: string | null | undefined) {
       return "微信";
     case "qq":
       return "QQ";
+    case "phone":
+      return "电话";
     case "telegram":
       return "Telegram";
     case "email":
       return "邮箱";
+    case "website":
+      return "网站";
     case "qr":
       return "二维码";
     case "link":
       return "跳转链接";
+    case "other":
+      return "其他";
     default:
       return type || "未分类";
   }
@@ -168,7 +174,7 @@ export function buildContactKeyword(contact: ContactRecord) {
 
 export async function loadAdminContacts(): Promise<ContactListViewModel> {
   const response = await apiFetch<ApiResponse<ContactRecord[]>>("/contacts");
-  const contacts = unwrapApiResponse(response, "Failed to load contacts");
+  const contacts = unwrapApiResponse(response, "联系人加载失败");
 
   return {
     contacts: Array.isArray(contacts) ? contacts : [],
@@ -182,7 +188,7 @@ export async function createAdminContact(state: ContactFormState) {
     body: JSON.stringify(buildContactPayload(state))
   });
 
-  return unwrapApiResponse(response, "Failed to create contact");
+  return unwrapApiResponse(response, "联系人创建失败");
 }
 
 export async function updateAdminContact(id: number, state: ContactFormState) {
@@ -191,7 +197,7 @@ export async function updateAdminContact(id: number, state: ContactFormState) {
     body: JSON.stringify(buildContactPayload(state))
   });
 
-  return unwrapApiResponse(response, "Failed to update contact");
+  return unwrapApiResponse(response, "联系人更新失败");
 }
 
 export async function deleteAdminContact(id: number) {
@@ -199,7 +205,7 @@ export async function deleteAdminContact(id: number) {
     method: "DELETE"
   });
 
-  unwrapApiResponse(response, "Failed to delete contact");
+  unwrapApiResponse(response, "联系人删除失败");
 }
 
 export async function updateAdminContactStatus(id: number, status: ContactStatusValue) {
@@ -208,7 +214,7 @@ export async function updateAdminContactStatus(id: number, status: ContactStatus
     body: JSON.stringify({ status })
   });
 
-  return unwrapApiResponse(response, "Failed to update contact status");
+  return unwrapApiResponse(response, "联系人状态更新失败");
 }
 
 export async function updateAdminContactSortOrder(id: number, sortOrder: number) {
@@ -217,5 +223,5 @@ export async function updateAdminContactSortOrder(id: number, sortOrder: number)
     body: JSON.stringify({ sortOrder })
   });
 
-  return unwrapApiResponse(response, "Failed to update contact sort order");
+  return unwrapApiResponse(response, "联系人排序更新失败");
 }

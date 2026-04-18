@@ -26,4 +26,5 @@ mvn -f backend/pom.xml -DskipTests package
 
 ## 部署与验收
 
+- [宝塔 + Docker Compose 部署说明](docs/deploy/宝塔-Docker-Compose-部署.md)
 - [基础版部署与验收清单](docs/planning/基础版-部署与验收清单.md)

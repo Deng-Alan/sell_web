@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { AdminField } from "@/components/admin/admin-field";
 import { AdminMetricCard } from "@/components/admin/admin-metric-card";
+import { AdminNotice } from "@/components/admin/admin-notice";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -48,6 +50,17 @@ export function AdminProductManager() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
+  async function runLoad(nextFilters: AdminProductListFilters) {
+    setLoading(true);
+    const nextViewModel = await loadAdminProductList({
+      ...nextFilters,
+      keyword: deferredKeyword
+    });
+    setViewModel(nextViewModel);
+    setLoading(false);
+    setStatusMessage(nextViewModel.source === "fallback" ? "商品数据暂时不可用，请检查后台接口或登录状态。" : null);
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -64,7 +77,7 @@ export function AdminProductManager() {
 
       setViewModel(nextViewModel);
       setLoading(false);
-      setStatusMessage(nextViewModel.source === "fallback" ? `无法加载商品列表，请检查网络连接。` : null);
+      setStatusMessage(nextViewModel.source === "fallback" ? "商品数据暂时不可用，请检查后台接口或登录状态。" : null);
     }
 
     void run();
@@ -89,14 +102,10 @@ export function AdminProductManager() {
   }
 
   async function refresh() {
-    setLoading(true);
-    const nextViewModel = await loadAdminProductList({
-      ...filters,
-      keyword: deferredKeyword
-    });
-    setViewModel(nextViewModel);
-    setLoading(false);
-    setStatusMessage(nextViewModel.source === "fallback" ? `无法刷新数据，请检查网络连接。` : "数据已刷新");
+    await runLoad(filters);
+    if (viewModel?.source !== "fallback") {
+      setStatusMessage("商品列表已更新。");
+    }
   }
 
   async function runMutation(id: string, actionLabel: string, mutation: () => Promise<unknown>) {
@@ -116,14 +125,14 @@ export function AdminProductManager() {
 
   async function handleToggleStatus(product: AdminProductRecord) {
     const nextStatus: AdminFlagValue = product.status === 1 ? 0 : 1;
-    await runMutation(String(product.id), nextStatus === 1 ? "上架" : "下架", () =>
+    await runMutation(String(product.id), nextStatus === 1 ? "商品已上架" : "商品已下架", () =>
       toggleAdminProductStatus(String(product.id), nextStatus)
     );
   }
 
   async function handleToggleRecommendation(product: AdminProductRecord) {
     const nextRecommendation: AdminFlagValue = product.isRecommended === 1 ? 0 : 1;
-    await runMutation(String(product.id), nextRecommendation === 1 ? "推荐" : "取消推荐", () =>
+    await runMutation(String(product.id), nextRecommendation === 1 ? "已设为推荐" : "已取消推荐", () =>
       toggleAdminProductRecommendation(String(product.id), nextRecommendation)
     );
   }
@@ -134,253 +143,231 @@ export function AdminProductManager() {
       return;
     }
 
-    await runMutation(String(product.id), "删除", () => deleteAdminProduct(String(product.id)));
+    await runMutation(String(product.id), "商品已删除", () => deleteAdminProduct(String(product.id)));
   }
-
-  const sourceTag = viewModel?.source ?? "fallback";
 
   return (
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="管理后台 / 商品管理"
+          eyebrow="内容管理 / 商品"
           title="商品管理"
-          description="管理商品列表、筛选、分页、状态切换和编辑功能。"
+          description="把最常用的商品维护动作集中到一个页面：筛选、翻页、上下架、推荐和编辑都能快速完成。"
           actions={
             <>
-              <button
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200"
-                onClick={() => void refresh()}
-                type="button"
-              >
-                刷新
+              <button className="admin-button-secondary" onClick={() => void refresh()} type="button">
+                刷新列表
               </button>
-              <Link
-                href="/admin/products/create"
-                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100"
-              >
+              <Link href="/admin/products/create" className="admin-button-primary">
                 新增商品
               </Link>
             </>
           }
         />
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <AdminMetricCard label="总商品" value={String(totalProducts)} hint="商品总数统计" accent="cyan" />
-          <AdminMetricCard label="可见商品" value={String(productCountByStatus(products, 1))} hint="已上架的商品数量" accent="emerald" />
-          <AdminMetricCard label="推荐商品" value={String(productCountByRecommendation(products, 1))} hint="设为推荐的商品数量" accent="amber" />
-          <AdminMetricCard label="总库存" value={String(totalStock)} hint="所有商品库存总和" accent="violet" />
+        {statusMessage ? (
+          <AdminNotice tone={viewModel?.source === "fallback" ? "error" : "success"} message={statusMessage} />
+        ) : null}
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <AdminMetricCard label="商品总数" value={String(totalProducts)} hint="已录入商品总量" accent="cyan" />
+          <AdminMetricCard label="已上架" value={String(productCountByStatus(products, 1))} hint="前台当前可见商品" accent="emerald" />
+          <AdminMetricCard label="推荐中" value={String(productCountByRecommendation(products, 1))} hint="首页或优先推荐商品" accent="amber" />
+          <AdminMetricCard label="库存总量" value={String(totalStock)} hint="当前页商品库存总和" accent="violet" />
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-          <AdminPanel
-            title="商品列表"
-            description="商品列表展示与管理功能。"
-            actions={
-              <>
-                <AdminStatusPill status={sourceTag === "api" ? "published" : "pending"} label={sourceTag === "api" ? "在线" : "离线"} />
-              </>
-            }
-          >
-            <div className="mb-4 grid gap-3 xl:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr_0.72fr]">
-              <AdminField label="关键词" hint="按名称或描述搜索。">
-                <input
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-                  placeholder="搜索商品"
-                  value={filters.keyword}
-                  onChange={(event) => updateFilters({ keyword: event.target.value }, true)}
-                />
-              </AdminField>
-              <AdminField label="分类" hint="按商品分类筛选。">
-                <select
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
-                  value={filters.categoryId}
-                  onChange={(event) => updateFilters({ categoryId: event.target.value }, true)}
-                >
-                  <option value="all">全部分类</option>
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
-              </AdminField>
-              <AdminField label="状态" hint="0 = 隐藏，1 = 可见。">
-                <select
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
-                  value={filters.status}
-                  onChange={(event) => updateFilters({ status: event.target.value }, true)}
-                >
-                  <option value="all">全部状态</option>
-                  <option value="1">可见</option>
-                  <option value="0">隐藏</option>
-                </select>
-              </AdminField>
-              <AdminField label="推荐" hint="0 = 普通，1 = 推荐。">
-                <select
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
-                  value={filters.isRecommended}
-                  onChange={(event) => updateFilters({ isRecommended: event.target.value }, true)}
-                >
-                  <option value="all">全部</option>
-                  <option value="1">推荐</option>
-                  <option value="0">普通</option>
-                </select>
-              </AdminField>
-              <AdminField label="每页数量" hint="切换分页大小后会重置到第一页。">
-                <select
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
-                  value={String(filters.pageSize)}
-                  onChange={(event) => updateFilters({ pageSize: Number(event.target.value) }, true)}
-                >
-                  <option value="10">10 条</option>
-                  <option value="20">20 条</option>
-                  <option value="50">50 条</option>
-                </select>
-              </AdminField>
-            </div>
+        <AdminPanel title="筛选与列表" description="先筛后看，适合新手快速定位商品。">
+          <div className="mb-5 grid gap-3 xl:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr_0.72fr]">
+            <AdminField label="关键词" hint="按商品名称或摘要搜索。">
+              <input
+                className="admin-input"
+                placeholder="搜索商品"
+                value={filters.keyword}
+                onChange={(event) => updateFilters({ keyword: event.target.value }, true)}
+              />
+            </AdminField>
+            <AdminField label="分类" hint="按商品分类筛选。">
+              <select className="admin-select" value={filters.categoryId} onChange={(event) => updateFilters({ categoryId: event.target.value }, true)}>
+                <option value="all">全部分类</option>
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </AdminField>
+            <AdminField label="状态" hint="筛选上架或隐藏商品。">
+              <select className="admin-select" value={filters.status} onChange={(event) => updateFilters({ status: event.target.value }, true)}>
+                <option value="all">全部状态</option>
+                <option value="1">已上架</option>
+                <option value="0">隐藏</option>
+              </select>
+            </AdminField>
+            <AdminField label="推荐" hint="区分推荐商品和普通商品。">
+              <select
+                className="admin-select"
+                value={filters.isRecommended}
+                onChange={(event) => updateFilters({ isRecommended: event.target.value }, true)}
+              >
+                <option value="all">全部</option>
+                <option value="1">推荐商品</option>
+                <option value="0">普通商品</option>
+              </select>
+            </AdminField>
+            <AdminField label="每页数量" hint="切换后自动回到第一页。">
+              <select className="admin-select" value={String(filters.pageSize)} onChange={(event) => updateFilters({ pageSize: Number(event.target.value) }, true)}>
+                <option value="10">10 条</option>
+                <option value="20">20 条</option>
+                <option value="50">50 条</option>
+              </select>
+            </AdminField>
+          </div>
 
-            {statusMessage ? (
-              <div className="mb-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
-                {statusMessage}
-              </div>
-            ) : null}
-
-            <div className="overflow-hidden rounded-3xl border border-white/10">
-              <table className="min-w-full divide-y divide-white/10 text-left text-sm">
-                <thead className="bg-white/5 text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">商品</th>
-                    <th className="px-4 py-3 font-medium">分类</th>
-                    <th className="px-4 py-3 font-medium">价格</th>
-                    <th className="px-4 py-3 font-medium">库存</th>
-                    <th className="px-4 py-3 font-medium">状态</th>
-                    <th className="px-4 py-3 font-medium">推荐</th>
-                    <th className="px-4 py-3 font-medium">联系人</th>
-                    <th className="px-4 py-3 font-medium">更新</th>
-                    <th className="px-4 py-3 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {loading ? (
-                    <tr className="bg-slate-950/40">
-                      <td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-400">
-                        正在加载商品数据...
-                      </td>
+          {viewModel?.source === "fallback" && !loading ? (
+            <AdminEmptyState
+              title="商品列表暂时不可用"
+              description="当前没有读取到真实商品数据。请先确认后端服务和登录状态，然后重试。"
+              action={
+                <button className="admin-button-primary" onClick={() => void refresh()} type="button">
+                  重新加载
+                </button>
+              }
+            />
+          ) : (
+            <>
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>商品信息</th>
+                      <th>分类</th>
+                      <th>价格</th>
+                      <th>库存</th>
+                      <th>状态</th>
+                      <th>推荐</th>
+                      <th>联系人</th>
+                      <th>更新时间</th>
+                      <th>操作</th>
                     </tr>
-                  ) : products.length === 0 ? (
-                    <tr className="bg-slate-950/40">
-                      <td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-400">
-                        当前筛选条件下没有商品。
-                      </td>
-                    </tr>
-                  ) : (
-                    products.map((product) => (
-                      <tr key={product.id} className="bg-slate-950/40">
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            <p className="font-medium text-white">{product.name}</p>
-                            <p className="text-xs leading-5 text-slate-500">{product.shortDesc || "暂无摘要"}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-slate-300">{product.categoryName ?? "未分类"}</td>
-                        <td className="px-4 py-4 text-slate-200">{formatProductMoney(product.price)}</td>
-                        <td className="px-4 py-4 text-slate-200">{product.stock ?? 0}</td>
-                        <td className="px-4 py-4">
-                          <AdminStatusPill status={product.status === 1 ? "published" : "disabled"} label={getProductStatusLabel(product.status)} />
-                        </td>
-                        <td className="px-4 py-4">
-                          <AdminStatusPill
-                            status={product.isRecommended === 1 ? "indexed" : "noindex"}
-                            label={getRecommendationLabel(product.isRecommended)}
-                          />
-                        </td>
-                        <td className="px-4 py-4 text-slate-300">{product.contactName ?? "未绑定"}</td>
-                        <td className="px-4 py-4 text-slate-400">{formatProductDateTime(product.updatedAt)}</td>
-                        <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            <Link
-                              href={`/admin/products/${product.id}`}
-                              className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200"
-                            >
-                              编辑
-                            </Link>
-                            <button
-                              className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() => void handleToggleStatus(product)}
-                              disabled={pendingId === String(product.id)}
-                              type="button"
-                            >
-                              {product.status === 1 ? "下架" : "上架"}
-                            </button>
-                            <button
-                              className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() => void handleToggleRecommendation(product)}
-                              disabled={pendingId === String(product.id)}
-                              type="button"
-                            >
-                              {product.isRecommended === 1 ? "取消推荐" : "设为推荐"}
-                            </button>
-                            <button
-                              className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() => void handleDelete(product)}
-                              disabled={pendingId === String(product.id)}
-                              type="button"
-                            >
-                              删除
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      Array.from({ length: 4 }).map((_, index) => (
+                        <tr key={`loading-${index}`}>
+                          <td colSpan={9}>
+                            <div className="grid gap-2">
+                              <div className="h-4 w-40 rounded-full bg-slate-200" />
+                              <div className="h-3 w-64 rounded-full bg-slate-100" />
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : products.length === 0 ? (
+                      <tr>
+                        <td colSpan={9}>
+                          <AdminEmptyState title="当前没有符合条件的商品" description="可以调整筛选条件，或者直接新增一条商品。" />
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {viewModel ? (
-              <div className="mt-4 flex flex-col gap-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
-                <span>
-                  当前第 {viewModel.page}/{totalPages} 页，每页 {viewModel.pageSize} 条，本次返回 {products.length} 条，共 {viewModel.total} 条
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => updateFilters({ page: 1 })}
-                    disabled={loading || viewModel.page <= 1}
-                    type="button"
-                  >
-                    首页
-                  </button>
-                  <button
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => updateFilters({ page: viewModel.page - 1 })}
-                    disabled={loading || viewModel.page <= 1}
-                    type="button"
-                  >
-                    上一页
-                  </button>
-                  <button
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => updateFilters({ page: viewModel.page + 1 })}
-                    disabled={loading || viewModel.page >= totalPages}
-                    type="button"
-                  >
-                    下一页
-                  </button>
-                  <button
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => updateFilters({ page: totalPages })}
-                    disabled={loading || viewModel.page >= totalPages}
-                    type="button"
-                  >
-                    末页
-                  </button>
-                </div>
+                    ) : (
+                      products.map((product) => (
+                        <tr key={product.id}>
+                          <td>
+                            <div className="space-y-1">
+                              <p className="font-medium text-slate-900">{product.name}</p>
+                              <p className="text-xs leading-5 text-slate-500">{product.shortDesc || "暂无摘要说明"}</p>
+                            </div>
+                          </td>
+                          <td>{product.categoryName ?? "未分类"}</td>
+                          <td className="font-medium text-slate-900">{formatProductMoney(product.price)}</td>
+                          <td>{product.stock ?? 0}</td>
+                          <td>
+                            <AdminStatusPill status={product.status === 1 ? "published" : "disabled"} label={getProductStatusLabel(product.status)} />
+                          </td>
+                          <td>
+                            <AdminStatusPill
+                              status={product.isRecommended === 1 ? "indexed" : "noindex"}
+                              label={getRecommendationLabel(product.isRecommended)}
+                            />
+                          </td>
+                          <td>{product.contactName ?? "未绑定"}</td>
+                          <td>{formatProductDateTime(product.updatedAt)}</td>
+                          <td>
+                            <div className="flex flex-wrap gap-2">
+                              <Link href={`/admin/products/${product.id}`} className="admin-button-secondary !px-3 !py-1.5 !text-xs">
+                                编辑
+                              </Link>
+                              <button
+                                className="admin-button-secondary !px-3 !py-1.5 !text-xs"
+                                onClick={() => void handleToggleStatus(product)}
+                                disabled={pendingId === String(product.id)}
+                                type="button"
+                              >
+                                {product.status === 1 ? "下架" : "上架"}
+                              </button>
+                              <button
+                                className="admin-button-secondary !px-3 !py-1.5 !text-xs"
+                                onClick={() => void handleToggleRecommendation(product)}
+                                disabled={pendingId === String(product.id)}
+                                type="button"
+                              >
+                                {product.isRecommended === 1 ? "取消推荐" : "设为推荐"}
+                              </button>
+                              <button
+                                className="admin-button-danger !px-3 !py-1.5 !text-xs"
+                                onClick={() => void handleDelete(product)}
+                                disabled={pendingId === String(product.id)}
+                                type="button"
+                              >
+                                删除
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-            ) : null}
-          </AdminPanel>
-        </div>
+
+              {viewModel && products.length > 0 ? (
+                <div className="mt-4 flex flex-col gap-3 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+                  <span>
+                    第 {viewModel.page} / {totalPages} 页 · 每页 {viewModel.pageSize} 条 · 共 {viewModel.total} 条
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="admin-button-secondary" onClick={() => updateFilters({ page: 1 })} disabled={loading || viewModel.page <= 1} type="button">
+                      首页
+                    </button>
+                    <button
+                      className="admin-button-secondary"
+                      onClick={() => updateFilters({ page: viewModel.page - 1 })}
+                      disabled={loading || viewModel.page <= 1}
+                      type="button"
+                    >
+                      上一页
+                    </button>
+                    <button
+                      className="admin-button-secondary"
+                      onClick={() => updateFilters({ page: viewModel.page + 1 })}
+                      disabled={loading || viewModel.page >= totalPages}
+                      type="button"
+                    >
+                      下一页
+                    </button>
+                    <button
+                      className="admin-button-secondary"
+                      onClick={() => updateFilters({ page: totalPages })}
+                      disabled={loading || viewModel.page >= totalPages}
+                      type="button"
+                    >
+                      末页
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          )}
+        </AdminPanel>
       </div>
     </AdminShell>
   );

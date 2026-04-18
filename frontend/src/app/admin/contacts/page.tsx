@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { AdminField } from "@/components/admin/admin-field";
 import { AdminMetricCard } from "@/components/admin/admin-metric-card";
+import { AdminNotice } from "@/components/admin/admin-notice";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -25,14 +27,18 @@ import {
   updateAdminContactSortOrder,
   updateAdminContactStatus
 } from "@/lib/admin-contacts";
+import { uploadAdminImage } from "@/lib/admin-upload";
 
 const CONTACT_TYPE_OPTIONS = [
   { label: "微信", value: "wechat" },
   { label: "QQ", value: "qq" },
+  { label: "电话", value: "phone" },
   { label: "Telegram", value: "telegram" },
   { label: "邮箱", value: "email" },
+  { label: "网站", value: "website" },
   { label: "二维码", value: "qr" },
-  { label: "跳转链接", value: "link" }
+  { label: "跳转链接", value: "link" },
+  { label: "其他", value: "other" }
 ];
 
 const STATUS_OPTIONS = [
@@ -42,7 +48,6 @@ const STATUS_OPTIONS = [
 ];
 
 const TYPE_OPTIONS = [{ label: "全部类型", value: "all" }, ...CONTACT_TYPE_OPTIONS];
-
 const DISPLAY_PLACE_HINT = "home,product,detail,footer";
 
 function formatDateTime(value: string) {
@@ -104,6 +109,8 @@ export default function AdminContactsPage() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ kind: "success" | "error" | "info"; message: string } | null>(null);
+  const [uploadingQr, setUploadingQr] = useState(false);
+  const qrUploadInputRef = useRef<HTMLInputElement | null>(null);
 
   const filteredContacts = useMemo(() => {
     return contacts
@@ -116,9 +123,9 @@ export default function AdminContactsPage() {
     const total = contacts.length;
     const enabled = contacts.filter((contact) => contact.status === 1).length;
     const disabled = contacts.filter((contact) => contact.status === 0).length;
-    const pending = contacts.filter((contact) => contact.status == null).length;
+    const qrEnabled = contacts.filter((contact) => Boolean(contact.qrImage)).length;
 
-    return { total, enabled, disabled, pending };
+    return { total, enabled, disabled, qrEnabled };
   }, [contacts]);
 
   async function refreshContacts(nextSelectionId?: number | null) {
@@ -199,6 +206,31 @@ export default function AdminContactsPage() {
     }));
   }
 
+  async function handleQrUpload(fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) {
+      return;
+    }
+
+    setUploadingQr(true);
+    setError(null);
+
+    try {
+      const uploaded = await uploadAdminImage(file);
+      handleFormChange("qrImage", uploaded.url);
+      setNotice({ kind: "success", message: "二维码图片已上传。" });
+    } catch (exception) {
+      const message = exception instanceof Error ? exception.message : "二维码上传失败";
+      setError(message);
+      setNotice({ kind: "error", message });
+    } finally {
+      setUploadingQr(false);
+      if (qrUploadInputRef.current) {
+        qrUploadInputRef.current.value = "";
+      }
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
@@ -275,8 +307,8 @@ export default function AdminContactsPage() {
     const sortOrder = Number.parseInt(sortValue.trim(), 10);
 
     if (Number.isNaN(sortOrder)) {
-      setError("请输入有效的排序值");
-      setNotice({ kind: "error", message: "请输入有效的排序值" });
+      setError("请输入有效的排序值。");
+      setNotice({ kind: "error", message: "请输入有效的排序值。" });
       return;
     }
 
@@ -306,23 +338,15 @@ export default function AdminContactsPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="管理后台 / 联系方式"
+          eyebrow="内容管理 / 联系方式"
           title="联系方式管理"
-          description="管理联系方式渠道，支持筛选、创建、编辑、删除、启停和排序。"
+          description="维护咨询渠道、二维码和外链入口，并控制展示位置。"
           actions={
             <>
-              <button
-                type="button"
-                onClick={() => void refreshContacts(editingId)}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-cyan-400/30 hover:bg-cyan-400/10"
-              >
+              <button type="button" onClick={() => void refreshContacts(editingId)} className="admin-button-secondary">
                 刷新列表
               </button>
-              <button
-                type="button"
-                onClick={startCreate}
-                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 transition hover:bg-cyan-400/20"
-              >
+              <button type="button" onClick={startCreate} className="admin-button-primary">
                 新建渠道
               </button>
             </>
@@ -330,57 +354,37 @@ export default function AdminContactsPage() {
         />
 
         <div className="grid gap-4 md:grid-cols-4">
-          <AdminMetricCard label="渠道总数" value={String(metrics.total)} hint="联系方式渠道总数" accent="cyan" />
-          <AdminMetricCard label="已启用" value={String(metrics.enabled)} hint="status = 1 的渠道数量" accent="emerald" />
-          <AdminMetricCard label="已停用" value={String(metrics.disabled)} hint="status = 0 的渠道数量" accent="amber" />
-          <AdminMetricCard label="待确认" value={String(metrics.pending)} hint="status 为空时的兼容统计" accent="violet" />
+          <AdminMetricCard label="渠道总数" value={String(metrics.total)} hint="全部联系方式渠道" accent="cyan" />
+          <AdminMetricCard label="已启用" value={String(metrics.enabled)} hint="当前对前台可见" accent="emerald" />
+          <AdminMetricCard label="已停用" value={String(metrics.disabled)} hint="已隐藏或暂存" accent="amber" />
+          <AdminMetricCard label="带二维码" value={String(metrics.qrEnabled)} hint="已配置二维码图片" accent="violet" />
         </div>
 
-        {notice ? (
-          <div
-            className={[
-              "rounded-2xl border px-4 py-3 text-sm",
-              notice.kind === "success"
-                ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                : notice.kind === "error"
-                  ? "border-rose-400/20 bg-rose-400/10 text-rose-100"
-                  : "border-cyan-400/20 bg-cyan-400/10 text-cyan-100"
-            ].join(" ")}
-          >
-            {notice.message}
-          </div>
-        ) : null}
-
-        {error ? (
-          <div className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
-            {error}
-          </div>
-        ) : null}
+        {notice ? <AdminNotice tone={notice.kind === "info" ? "info" : notice.kind} message={notice.message} /> : null}
+        {error ? <AdminNotice tone="error" message={error} /> : null}
 
         <div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
           <AdminPanel
             title="联系人列表"
-            description="联系方式列表展示与筛选。"
+            description="支持按关键词、类型和状态筛选。"
             actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFilters({
-                      keyword: "",
-                      type: "all",
-                      status: "all"
-                    })
-                  }
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-                >
-                  清空筛选
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters({
+                    keyword: "",
+                    type: "all",
+                    status: "all"
+                  })
+                }
+                className="admin-button-secondary px-3 py-1.5 text-xs"
+              >
+                清空筛选
+              </button>
             }
           >
             <div className="mb-4 grid gap-3 lg:grid-cols-[1.2fr_0.7fr_0.7fr]">
-              <AdminField label="关键词" hint="按名称、值、跳转链接或备注模糊搜索">
+              <AdminField label="关键词" hint="按名称、值或链接搜索">
                 <input
                   value={filters.keyword}
                   onChange={(event) =>
@@ -389,11 +393,11 @@ export default function AdminContactsPage() {
                       keyword: event.target.value
                     }))
                   }
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-                  placeholder="输入名称、账号、链接关键词"
+                  className="admin-input"
+                  placeholder="输入名称、账号或链接关键词"
                 />
               </AdminField>
-              <AdminField label="类型" hint="用于快速查看不同渠道">
+              <AdminField label="类型" hint="按渠道类型筛选">
                 <select
                   value={filters.type}
                   onChange={(event) =>
@@ -402,7 +406,7 @@ export default function AdminContactsPage() {
                       type: event.target.value
                     }))
                   }
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
+                  className="admin-select"
                 >
                   {TYPE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -411,7 +415,7 @@ export default function AdminContactsPage() {
                   ))}
                 </select>
               </AdminField>
-              <AdminField label="状态" hint="只看启用或停用的联系人">
+              <AdminField label="状态" hint="只看启用或停用渠道">
                 <select
                   value={filters.status}
                   onChange={(event) =>
@@ -420,7 +424,7 @@ export default function AdminContactsPage() {
                       status: event.target.value
                     }))
                   }
-                  className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
+                  className="admin-select"
                 >
                   {STATUS_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -431,75 +435,84 @@ export default function AdminContactsPage() {
               </AdminField>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-white/10">
-              <table className="min-w-full divide-y divide-white/10 text-left text-sm">
-                <thead className="bg-white/5 text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">联系人</th>
-                    <th className="px-4 py-3 font-medium">类型</th>
-                    <th className="px-4 py-3 font-medium">值</th>
-                    <th className="px-4 py-3 font-medium">状态</th>
-                    <th className="px-4 py-3 font-medium">排序</th>
-                    <th className="px-4 py-3 font-medium">更新时间</th>
-                    <th className="px-4 py-3 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {loading ? (
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="h-14 animate-pulse rounded-2xl bg-slate-100" />
+                ))}
+              </div>
+            ) : filteredContacts.length === 0 ? (
+              <AdminEmptyState
+                title="没有符合条件的联系方式"
+                description="当前筛选条件下没有可展示的渠道，可以清空筛选或新建一条联系方式。"
+                action={
+                  <button type="button" onClick={startCreate} className="admin-button-primary">
+                    新建渠道
+                  </button>
+                }
+              />
+            ) : (
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
                     <tr>
-                      <td className="px-4 py-8 text-center text-slate-400" colSpan={7}>
-                        正在加载联系人数据...
-                      </td>
+                      <th>联系人</th>
+                      <th>类型</th>
+                      <th>值</th>
+                      <th>状态</th>
+                      <th>排序</th>
+                      <th>更新时间</th>
+                      <th>操作</th>
                     </tr>
-                  ) : filteredContacts.length === 0 ? (
-                    <tr>
-                      <td className="px-4 py-8 text-center text-slate-400" colSpan={7}>
-                        当前没有符合筛选条件的联系人。
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredContacts.map((contact) => {
+                  </thead>
+                  <tbody>
+                    {filteredContacts.map((contact) => {
                       const statusKey = getContactStatusKey(contact.status);
-                      const isBusy = busyKey === `status-${contact.id}` || busyKey === `sort-${contact.id}` || busyKey === `delete-${contact.id}`;
+                      const isBusy =
+                        busyKey === `status-${contact.id}` || busyKey === `sort-${contact.id}` || busyKey === `delete-${contact.id}`;
                       const places = splitDisplayPlaces(contact.displayPlaces);
 
                       return (
-                        <tr key={contact.id} className="bg-slate-950/40 align-top">
-                          <td className="px-4 py-4">
+                        <tr key={contact.id}>
+                          <td>
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
-                                <p className="font-medium text-white">{contact.name}</p>
+                                <p className="font-medium text-slate-900">{contact.name}</p>
                                 <AdminStatusPill status={statusKey} label={formatContactStatus(contact.status)} />
                               </div>
                               <p className="text-xs leading-5 text-slate-500">ID: {contact.id}</p>
                               <div className="flex flex-wrap gap-2">
-                                {places.map((place) => (
-                                  <span key={place} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                                    {place}
-                                  </span>
-                                ))}
+                                {places.length > 0 ? (
+                                  places.map((place) => (
+                                    <span key={place} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600">
+                                      {place}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-xs text-slate-400">未配置展示位置</span>
+                                )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-4 text-slate-300">{formatContactType(contact.type)}</td>
-                          <td className="px-4 py-4">
-                            <div className="space-y-2 text-slate-200">
+                          <td className="text-slate-600">{formatContactType(contact.type)}</td>
+                          <td>
+                            <div className="space-y-2 text-slate-700">
                               <p className="break-all">{contact.value}</p>
-                              {contact.jumpUrl ? <p className="break-all text-xs text-cyan-200/80">{contact.jumpUrl}</p> : null}
+                              {contact.jumpUrl ? <p className="break-all text-xs text-blue-600">{contact.jumpUrl}</p> : null}
                               {contact.qrImage ? <p className="break-all text-xs text-slate-500">{contact.qrImage}</p> : null}
                             </div>
                           </td>
-                          <td className="px-4 py-4">
+                          <td>
                             <button
                               type="button"
                               onClick={() => void handleToggleStatus(contact)}
                               disabled={isBusy}
-                              className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200 transition hover:border-white/20 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="admin-button-secondary px-3 py-1.5 text-xs"
                             >
                               {busyKey === `status-${contact.id}` ? "切换中..." : formatContactStatus(contact.status)}
                             </button>
                           </td>
-                          <td className="px-4 py-4">
+                          <td>
                             <div className="flex items-center gap-2">
                               <input
                                 type="number"
@@ -510,33 +523,29 @@ export default function AdminContactsPage() {
                                     [contact.id]: event.target.value
                                   }))
                                 }
-                                className="w-20 rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none"
+                                className="admin-input w-20 py-2"
                               />
                               <button
                                 type="button"
                                 onClick={() => void handleSaveSort(contact)}
                                 disabled={isBusy}
-                                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-100 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="admin-button-secondary px-3 py-1.5 text-xs"
                               >
-                                {busyKey === `sort-${contact.id}` ? "保存中..." : "保存排序"}
+                                {busyKey === `sort-${contact.id}` ? "保存中..." : "保存"}
                               </button>
                             </div>
                           </td>
-                          <td className="px-4 py-4 text-slate-400">{formatDateTime(contact.updatedAt)}</td>
-                          <td className="px-4 py-4">
+                          <td className="text-slate-500">{formatDateTime(contact.updatedAt)}</td>
+                          <td>
                             <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                onClick={() => startEdit(contact)}
-                                className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200 transition hover:border-white/20 hover:bg-white/5"
-                              >
+                              <button type="button" onClick={() => startEdit(contact)} className="admin-button-secondary px-3 py-1.5 text-xs">
                                 编辑
                               </button>
                               <button
                                 type="button"
                                 onClick={() => void handleDelete(contact)}
                                 disabled={isBusy}
-                                className="rounded-full border border-rose-400/30 px-3 py-1.5 text-xs text-rose-200 transition hover:bg-rose-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="admin-button-danger px-3 py-1.5 text-xs"
                               >
                                 {busyKey === `delete-${contact.id}` ? "删除中..." : "删除"}
                               </button>
@@ -544,25 +553,22 @@ export default function AdminContactsPage() {
                           </td>
                         </tr>
                       );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </AdminPanel>
 
           <div className="space-y-4">
-            <AdminPanel
-              title={editingId == null ? "新建联系人" : `编辑联系人 #${editingId}`}
-              description="联系人信息编辑表单,保存后会立即刷新列表。"
-            >
+            <AdminPanel title={editingId == null ? "新建联系人" : `编辑联系人 #${editingId}`} description="保存后会立即刷新列表和右侧预览。">
               <form className="grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <AdminField label="类型" required hint="选择联系方式类型">
                     <select
                       value={formState.type}
                       onChange={(event) => handleFormChange("type", event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
+                      className="admin-select"
                       required
                     >
                       {CONTACT_TYPE_OPTIONS.map((option) => (
@@ -572,11 +578,11 @@ export default function AdminContactsPage() {
                       ))}
                     </select>
                   </AdminField>
-                  <AdminField label="状态" required hint="1 = 启用，0 = 停用">
+                  <AdminField label="状态" required hint="控制前台是否展示">
                     <select
                       value={formState.status}
                       onChange={(event) => handleFormChange("status", event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none"
+                      className="admin-select"
                       required
                     >
                       <option value="1">启用</option>
@@ -585,84 +591,67 @@ export default function AdminContactsPage() {
                   </AdminField>
                 </div>
 
-                <AdminField label="名称" required hint="例如：微信客服、Telegram 频道、二维码入口">
+                <AdminField label="名称" required hint="例如：微信客服、Telegram 群、二维码入口">
                   <input
                     value={formState.name}
                     onChange={(event) => handleFormChange("name", event.target.value)}
-                    className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                    className="admin-input"
                     placeholder="请输入联系人名称"
                     required
                   />
                 </AdminField>
 
-                <AdminField label="值" required hint="账号、号码、链接文本，或其它前台要展示的值">
+                <AdminField label="值" required hint="账号、号码、链接文本或展示文案">
                   <textarea
                     value={formState.value}
                     onChange={(event) => handleFormChange("value", event.target.value)}
-                    className="min-h-[92px] rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                    className="admin-textarea min-h-[92px]"
                     placeholder="请输入联系方式值"
                     required
                   />
                 </AdminField>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <AdminField label="二维码图片" hint="可上传图片或填写图片地址">
+                  <AdminField label="二维码图片" hint="可直接填写地址，或上传图片">
                     <div className="space-y-2">
                       <input
                         value={formState.qrImage}
                         onChange={(event) => handleFormChange("qrImage", event.target.value)}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                        className="admin-input"
                         placeholder="https://..."
                       />
-                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-white/10 bg-slate-900/50 px-4 py-3 text-sm text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/5">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={async (event) => {
-                            const file = event.target.files?.[0];
-                            if (!file) return;
-
-                            const formData = new FormData();
-                            formData.append("file", file);
-
-                            try {
-                              const response = await fetch("/api/upload", {
-                                method: "POST",
-                                body: formData
-                              });
-
-                              if (!response.ok) {
-                                throw new Error("上传失败");
-                              }
-
-                              const data = await response.json();
-                              handleFormChange("qrImage", data.url);
-                            } catch (error) {
-                              alert(error instanceof Error ? error.message : "上传失败");
-                            }
-                          }}
-                        />
-                        <span>📤</span>
-                        <span>点击上传图片</span>
-                      </label>
+                      <button
+                        type="button"
+                        onClick={() => qrUploadInputRef.current?.click()}
+                        className="admin-button-secondary w-full"
+                        disabled={uploadingQr}
+                      >
+                        {uploadingQr ? "上传中..." : "上传二维码图片"}
+                      </button>
+                      <input
+                        ref={qrUploadInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => void handleQrUpload(event.target.files)}
+                      />
                     </div>
                   </AdminField>
-                  <AdminField label="跳转链接" hint="可用于按钮跳转、外链或私聊入口">
+                  <AdminField label="跳转链接" hint="可作为按钮外链或私聊入口">
                     <input
                       value={formState.jumpUrl}
                       onChange={(event) => handleFormChange("jumpUrl", event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                      className="admin-input"
                       placeholder="https://t.me/..."
                     />
                   </AdminField>
                 </div>
 
-                <AdminField label="展示位置" hint={`逗号分隔，例如 ${DISPLAY_PLACE_HINT}`}>
+                <AdminField label="展示位置" hint={`多个位置用逗号分隔，例如 ${DISPLAY_PLACE_HINT}`}>
                   <input
                     value={formState.displayPlaces}
                     onChange={(event) => handleFormChange("displayPlaces", event.target.value)}
-                    className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                    className="admin-input"
                     placeholder="home,product,detail"
                   />
                 </AdminField>
@@ -673,51 +662,43 @@ export default function AdminContactsPage() {
                       type="number"
                       value={formState.sortOrder}
                       onChange={(event) => handleFormChange("sortOrder", event.target.value)}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                      className="admin-input"
                       placeholder="0"
                     />
                   </AdminField>
-                  <AdminField label="当前状态预览" hint="保存前可快速确认">
-                    <div className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-slate-200">
+                  <AdminField label="当前状态预览" hint="保存前快速确认">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                       {selectedPreview.statusLabel}
                     </div>
                   </AdminField>
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
+                  <button type="submit" disabled={submitting} className="admin-button-primary">
                     {submitting ? "保存中..." : editingId == null ? "创建联系人" : "保存修改"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={startCreate}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-                  >
+                  <button type="button" onClick={startCreate} className="admin-button-secondary">
                     清空表单
                   </button>
                 </div>
               </form>
             </AdminPanel>
 
-            <AdminPanel title="表单预览" description="右侧区域直接展示当前编辑内容的前台形态。">
+            <AdminPanel title="表单预览" description="便于确认前台展示方式和咨询入口。">
               <div className="space-y-4">
-                <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-4">
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm text-slate-400">渠道名称</p>
-                      <h3 className="mt-1 text-xl font-semibold text-white">{selectedPreview.name}</h3>
+                      <p className="text-sm text-slate-500">渠道名称</p>
+                      <h3 className="mt-1 text-xl font-semibold text-slate-900">{selectedPreview.name}</h3>
                     </div>
                     <AdminStatusPill status={selectedPreview.status} label={selectedPreview.statusLabel} />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-slate-300">{selectedPreview.value}</p>
+                  <p className="mt-4 text-sm leading-6 text-slate-700">{selectedPreview.value}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {selectedPreview.places.length > 0 ? (
                       selectedPreview.places.map((place) => (
-                        <span key={place} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
+                        <span key={place} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600">
                           {place}
                         </span>
                       ))
@@ -728,19 +709,19 @@ export default function AdminContactsPage() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-4">
-                    <p className="text-sm text-slate-400">类型</p>
-                    <p className="mt-2 text-lg font-semibold text-white">{selectedPreview.type}</p>
-                    <p className="mt-2 text-xs text-slate-500">实际保存内容：type / name / value / qrImage / jumpUrl / displayPlaces / sortOrder / status</p>
+                  <div className="rounded-3xl border border-slate-200 bg-white p-4">
+                    <p className="text-sm text-slate-500">类型</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900">{selectedPreview.type}</p>
+                    <p className="mt-2 text-xs text-slate-500">保存字段：type / name / value / qrImage / jumpUrl / displayPlaces / sortOrder / status</p>
                   </div>
-                  <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-4">
-                    <p className="text-sm text-slate-400">二维码预览</p>
-                    <div className="mt-3 overflow-hidden rounded-2xl border border-dashed border-white/10 bg-slate-900/70">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-4">
+                    <p className="text-sm text-slate-500">二维码预览</p>
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
                       {formState.qrImage ? (
                         <img src={formState.qrImage} alt={selectedPreview.name} className="h-40 w-full object-cover" />
                       ) : (
                         <div className="flex h-40 items-center justify-center px-4 text-center text-sm text-slate-500">
-                          填入二维码图片地址后，这里会显示预览。
+                          填入二维码图片地址或上传图片后，这里会显示预览。
                         </div>
                       )}
                     </div>

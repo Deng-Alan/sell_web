@@ -26,3 +26,13 @@ export type ApiErrorShape = {
   code?: string;
   details?: Record<string, unknown>;
 };
+
+export type AdminDashboardStats = {
+  totalProducts: number;
+  activeProducts: number;
+  recommendedProducts: number;
+  totalCategories: number;
+  activeCategories: number;
+  totalContacts: number;
+  activeContacts: number;
+};

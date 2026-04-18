@@ -12,6 +12,7 @@ import {
   createEmptyHomeSettingsFormState,
   createHomeSectionDraft,
   createHomeSettingsFormState,
+  deleteHomeSection,
   homeSettingGroups,
   loadAdminHomeSettings,
   saveHomeSection,
@@ -25,13 +26,13 @@ import {
 } from "@/lib/admin-home-settings";
 
 const inputClassName =
-  "w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/40 focus:bg-slate-900";
+  "admin-input";
 
 const textAreaClassName =
-  "w-full min-h-[132px] rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/40 focus:bg-slate-900";
+  "admin-textarea";
 
 const selectClassName =
-  "w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition-colors focus:border-cyan-400/40 focus:bg-slate-900";
+  "admin-select";
 
 type NoticeTone = "success" | "warning" | "error";
 
@@ -45,11 +46,11 @@ const sectionKeySuggestions = ["hero_banner", "featured_products", "workflow", "
 function noticeClassName(tone: NoticeTone) {
   switch (tone) {
     case "success":
-      return "border-emerald-400/20 bg-emerald-400/10 text-emerald-100";
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
     case "warning":
-      return "border-amber-400/20 bg-amber-400/10 text-amber-100";
+      return "border-amber-200 bg-amber-50 text-amber-700";
     case "error":
-      return "border-rose-400/20 bg-rose-400/10 text-rose-100";
+      return "border-rose-200 bg-rose-50 text-rose-700";
   }
 }
 
@@ -96,7 +97,7 @@ function SectionEditorCard({
       description={hint}
       actions={
         <button
-          className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 disabled:opacity-50"
+          className="admin-button-primary"
           onClick={() => void onSave()}
           disabled={saving || !sectionKey.trim()}
           type="button"
@@ -108,7 +109,7 @@ function SectionEditorCard({
       <div className="grid gap-4 lg:grid-cols-2">
         <AdminField label="sectionKey" hint="区块唯一标识" required className="lg:col-span-2">
           {readonlyKey ? (
-            <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-200">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
               {sectionKey}
             </div>
           ) : (
@@ -190,35 +191,47 @@ function HomeSectionCard({
   draft,
   onDraftChange,
   onSave,
+  onDelete,
   saving
 }: {
   section: AdminHomeSectionRecord;
   draft: AdminHomeSectionDraft;
   onDraftChange: (patch: Partial<AdminHomeSectionDraft>) => void;
   onSave: () => Promise<void>;
+  onDelete: () => Promise<void>;
   saving: boolean;
 }) {
   return (
-    <section className="rounded-[1.65rem] border border-white/10 bg-slate-950/55 p-4 shadow-lg shadow-black/20">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+    <section className="rounded-[1.65rem] border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-white">{sectionDraftTitle(section)}</h3>
+            <h3 className="text-base font-semibold text-slate-900">{sectionDraftTitle(section)}</h3>
             <AdminStatusPill status={sectionStatusTone(section.status)} label={sectionStatusLabel(section.status)} />
           </div>
-          <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-400">
+          <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
             <span>key: {section.sectionKey}</span>
             <span>sort: {section.sortOrder ?? 0}</span>
           </div>
         </div>
-        <button
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-200 disabled:opacity-50"
-          onClick={() => void onSave()}
-          disabled={saving}
-          type="button"
-        >
-          {saving ? "保存中..." : "保存区块"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="admin-button-secondary px-4 py-2 text-xs"
+            onClick={() => void onSave()}
+            disabled={saving}
+            type="button"
+          >
+            {saving ? "保存中..." : "保存区块"}
+          </button>
+          <button
+            className="admin-button-danger px-4 py-2 text-xs"
+            onClick={() => void onDelete()}
+            disabled={saving}
+            type="button"
+          >
+            删除
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -390,6 +403,32 @@ export default function AdminHomeSettingsPage() {
     }
   }
 
+  async function handleDeleteSection(section: AdminHomeSectionRecord) {
+    const confirmed = window.confirm(`确认删除首页区块「${section.sectionKey}」吗？此操作不可恢复。`);
+    if (!confirmed) {
+      return;
+    }
+
+    setSavingSectionKey(section.sectionKey);
+    setNotice(null);
+
+    try {
+      await deleteHomeSection(section.sectionKey);
+      setNotice({
+        tone: "success",
+        message: `区块 ${section.sectionKey} 已删除`
+      });
+      await refreshHomeSettings(false);
+    } catch (error) {
+      setNotice({
+        tone: "error",
+        message: error instanceof Error ? error.message : "删除区块失败"
+      });
+    } finally {
+      setSavingSectionKey(null);
+    }
+  }
+
   const previewFields = useMemo(
     () => [
       { label: "读取来源", value: sourceLabel === "api" ? "在线" : sourceLabel === "partial" ? "部分" : "离线" },
@@ -404,13 +443,13 @@ export default function AdminHomeSettingsPage() {
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow="管理后台 / 站点设置 / 首页配置"
+          eyebrow="站点设置 / 首页配置"
           title="首页配置"
           description="管理站点设置与首页区块,支持读取、编辑和保存。"
           actions={
             <>
               <button
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 disabled:opacity-50"
+                className="admin-button-secondary"
                 onClick={() => void refreshHomeSettings(true)}
                 disabled={loading}
                 type="button"
@@ -418,7 +457,7 @@ export default function AdminHomeSettingsPage() {
                 {loading ? "读取中..." : "重新读取"}
               </button>
               <button
-                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-100 disabled:opacity-50"
+                className="admin-button-primary"
                 onClick={() => void handleSaveSettings()}
                 disabled={loading || savingSettings}
                 type="button"
@@ -439,10 +478,10 @@ export default function AdminHomeSettingsPage() {
 
         {loading && snapshot == null ? (
           <AdminPanel title="加载中" description="正在读取站点设置和首页区块数据。">
-            <div className="space-y-3 text-sm text-slate-400">
-              <div className="h-4 w-1/3 rounded-full bg-white/5" />
-              <div className="h-4 w-2/3 rounded-full bg-white/5" />
-              <div className="h-4 w-1/2 rounded-full bg-white/5" />
+            <div className="space-y-3 text-sm text-slate-500">
+              <div className="h-4 w-1/3 rounded-full bg-slate-100" />
+              <div className="h-4 w-2/3 rounded-full bg-slate-100" />
+              <div className="h-4 w-1/2 rounded-full bg-slate-100" />
             </div>
           </AdminPanel>
         ) : null}
@@ -456,7 +495,7 @@ export default function AdminHomeSettingsPage() {
                 description={group.description}
                 actions={
                   <button
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 disabled:opacity-50"
+                    className="admin-button-secondary px-3 py-1.5 text-xs"
                     onClick={() => void handleSaveSettings()}
                     disabled={loading || savingSettings}
                     type="button"
@@ -527,7 +566,7 @@ export default function AdminHomeSettingsPage() {
               }
             >
               {sections.length === 0 ? (
-                <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-slate-900/60 px-4 py-8 text-center text-sm text-slate-400">
+                <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
                   当前还没有首页区块数据，可以先在上面的“新增 / 更新区块”里创建一条。
                 </div>
               ) : (
@@ -550,6 +589,7 @@ export default function AdminHomeSettingsPage() {
                           }))
                         }
                         onSave={async () => handleSaveSection(section.sectionKey, draft)}
+                        onDelete={async () => handleDeleteSection(section)}
                         saving={savingSectionKey === section.sectionKey}
                       />
                     );
@@ -561,7 +601,7 @@ export default function AdminHomeSettingsPage() {
 
           <div className="space-y-6">
             <AdminPanel title="写入规则" description="页面表单值会保存。">
-              <ul className="space-y-3 text-sm leading-6 text-slate-300">
+              <ul className="space-y-3 text-sm leading-6 text-slate-600">
                 <li>站点设置保存到 home 配置组。</li>
                 <li>首页区块保存到对应的区块配置。</li>
                 <li>页面会自动带上当前管理员登录态。</li>
@@ -570,10 +610,10 @@ export default function AdminHomeSettingsPage() {
             </AdminPanel>
 
             <AdminPanel title="当前未保存内容" description="这些内容会直接提交到 groupName=home 的站点设置。">
-              <div className="space-y-3 text-sm leading-6 text-slate-300">
+              <div className="space-y-3 text-sm leading-6 text-slate-600">
                 {homeSettingGroups.map((group) => (
-                  <div key={group.title} className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-                    <p className="text-sm font-medium text-white">{group.title}</p>
+                  <div key={group.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-sm font-medium text-slate-900">{group.title}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.24em] text-slate-500">
                       {group.fields.map((field) => field.key).join(" / ")}
                     </p>
@@ -587,7 +627,7 @@ export default function AdminHomeSettingsPage() {
                 {sectionKeySuggestions.map((key) => (
                   <button
                     key={key}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 transition-colors hover:bg-white/10"
+                    className="admin-button-secondary px-3 py-1.5 text-xs"
                     onClick={() => setNewSectionKey(key)}
                     type="button"
                   >

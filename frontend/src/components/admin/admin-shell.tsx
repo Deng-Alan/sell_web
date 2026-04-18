@@ -9,11 +9,11 @@ export function AdminShell({ children, className = "" }: AdminShellProps) {
   return (
     <section
       className={[
-        "relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/95 p-4 shadow-2xl shadow-black/30 ring-1 ring-white/5 sm:p-6",
+        "relative overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/80 p-4 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:p-6 lg:p-7",
         className
       ].join(" ")}
     >
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-blue-50 via-white to-emerald-50" />
       <div className="relative">{children}</div>
     </section>
   );

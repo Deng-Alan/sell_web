@@ -1,6 +1,6 @@
 export type ChannelStatus = "enabled" | "disabled" | "pending";
 
-export type ChannelType = "wechat" | "qq" | "telegram" | "email" | "qr" | "link";
+export type ChannelType = "wechat" | "qq" | "phone" | "telegram" | "email" | "website" | "qr" | "link" | "other";
 
 export type ContactChannelListItem = {
   id: string;

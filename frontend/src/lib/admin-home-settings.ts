@@ -1,7 +1,6 @@
 import { getStoredAdminAuthHeaders } from "@/lib/auth";
+import { joinApiPath } from "@/lib/api-base";
 import type { ApiResponse } from "@/types/api";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
 
 export type AdminHomeSettingFieldDef = {
   key: string;
@@ -166,10 +165,6 @@ export const homeSettingGroups: AdminHomeSettingGroupDef[] = [
 
 export const homeSettingFields = homeSettingGroups.flatMap((group) => group.fields);
 
-function joinPath(path: string) {
-  return `${apiBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
-
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -186,7 +181,7 @@ function buildHeaders() {
 }
 
 async function requestAdminApi<T>(path: string, init: RequestInit = {}) {
-  const response = await fetch(joinPath(path), {
+  const response = await fetch(joinApiPath(path), {
     ...init,
     cache: "no-store",
     headers: {
@@ -344,5 +339,16 @@ export async function saveHomeSection(sectionKey: string, draft: AdminHomeSectio
   return requestAdminApi<AdminHomeSectionRecord>(`/home-sections/${encodeURIComponent(trimmedKey)}`, {
     method: "PUT",
     body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteHomeSection(sectionKey: string) {
+  const trimmedKey = normalizeText(sectionKey);
+  if (!trimmedKey) {
+    throw new Error("sectionKey 不能为空");
+  }
+
+  await requestAdminApi<void>(`/home-sections/${encodeURIComponent(trimmedKey)}`, {
+    method: "DELETE"
   });
 }

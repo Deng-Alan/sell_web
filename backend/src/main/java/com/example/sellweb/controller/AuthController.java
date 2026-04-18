@@ -3,7 +3,6 @@ package com.example.sellweb.controller;
 import com.example.sellweb.dto.ApiResponse;
 import com.example.sellweb.dto.LoginRequest;
 import com.example.sellweb.dto.LoginResponse;
-import com.example.sellweb.dto.auth.ChangePasswordRequest;
 import com.example.sellweb.dto.auth.CurrentUserResponse;
 import com.example.sellweb.entity.AdminUser;
 import com.example.sellweb.service.AuthService;
@@ -64,13 +63,5 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> logout(Authentication authentication) {
         authService.logout(authentication);
         return ResponseEntity.ok(ApiResponse.success("退出登录成功", null));
-    }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<ApiResponse<Void>> changePassword(
-            Authentication authentication,
-            @Valid @RequestBody ChangePasswordRequest request) {
-        authService.changePassword(authentication, request);
-        return ResponseEntity.ok(ApiResponse.success("密码修改成功，请重新登录", null));
     }
 }

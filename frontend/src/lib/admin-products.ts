@@ -52,96 +52,6 @@ export type AdminProductEditorViewModel = {
   error: string | null;
 };
 
-const FALLBACK_CATEGORIES: AdminCategoryRecord[] = [
-  { id: 1, name: "邮箱账号", slug: "mail-accounts", sortOrder: 10, status: 1, createdAt: "2026-04-15 09:00:00", updatedAt: "2026-04-15 09:00:00" },
-  { id: 2, name: "社媒账号", slug: "social-accounts", sortOrder: 20, status: 1, createdAt: "2026-04-15 09:00:00", updatedAt: "2026-04-15 09:00:00" },
-  { id: 3, name: "工具软件", slug: "software-tools", sortOrder: 30, status: 1, createdAt: "2026-04-15 09:00:00", updatedAt: "2026-04-15 09:00:00" }
-];
-
-const FALLBACK_CONTACTS: AdminContactRecord[] = [
-  {
-    id: 1,
-    type: "wechat",
-    name: "微信客服",
-    value: "sell-web-support",
-    qrImage: null,
-    jumpUrl: null,
-    displayPlaces: "product,home",
-    sortOrder: 10,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  }
-];
-
-const FALLBACK_PRODUCTS: AdminProductRecord[] = [
-  {
-    id: 2401,
-    categoryId: 1,
-    categoryName: "邮箱账号",
-    contactId: 1,
-    contactName: "微信客服",
-    name: "Gmail 资源包",
-    coverImage: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-    shortDesc: "可直接用于列表展示和后台编辑联调的占位商品。",
-    content: "这里是商品详情正文，用于联调用的真实字段映射。",
-    price: 18,
-    originalPrice: 30,
-    stock: 126,
-    isRecommended: 1,
-    sortOrder: 1,
-    status: 1,
-    imageUrls: [
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=80"
-    ],
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 10:22:00"
-  },
-  {
-    id: 2402,
-    categoryId: 2,
-    categoryName: "社媒账号",
-    contactId: 2,
-    contactName: "Telegram",
-    name: "Instagram 普通号",
-    coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
-    shortDesc: "适合做编辑、上架、下架流程联调的第二条样例数据。",
-    content: "这是一条用于后台测试的商品内容。",
-    price: 32,
-    originalPrice: 48,
-    stock: 48,
-    isRecommended: 0,
-    sortOrder: 2,
-    status: 1,
-    imageUrls: [
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
-    ],
-    createdAt: "2026-04-14 09:00:00",
-    updatedAt: "2026-04-14 19:08:00"
-  },
-  {
-    id: 2403,
-    categoryId: 3,
-    categoryName: "工具软件",
-    contactId: null,
-    contactName: null,
-    name: "工具软件下载包",
-    coverImage: null,
-    shortDesc: "下架状态样例。",
-    content: "用于展示隐藏商品、下架动作和编辑回显。",
-    price: 12,
-    originalPrice: null,
-    stock: 0,
-    isRecommended: 0,
-    sortOrder: 3,
-    status: 0,
-    imageUrls: [],
-    createdAt: "2026-04-13 09:00:00",
-    updatedAt: "2026-04-13 16:44:00"
-  }
-];
-
 function toOption(record: AdminCategoryRecord): AdminCategoryOption {
   return {
     label: record.name,
@@ -166,57 +76,6 @@ function normalizeProductQuery(filters: AdminProductListFilters): AdminProductQu
     isRecommended: filters.isRecommended && filters.isRecommended !== "all" ? filters.isRecommended : undefined,
     page: filters.page,
     pageSize: filters.pageSize
-  };
-}
-
-function matchesFallbackQuery(product: AdminProductRecord, filters: AdminProductListFilters) {
-  if (filters.categoryId !== "all" && String(product.categoryId ?? "") !== filters.categoryId) {
-    return false;
-  }
-
-  if (filters.status !== "all" && String(product.status ?? "") !== filters.status) {
-    return false;
-  }
-
-  if (filters.isRecommended !== "all" && String(product.isRecommended ?? "") !== filters.isRecommended) {
-    return false;
-  }
-
-  if (filters.keyword.trim()) {
-    const keyword = filters.keyword.trim().toLowerCase();
-    const name = (product.name ?? "").toLowerCase();
-    const shortDesc = (product.shortDesc ?? "").toLowerCase();
-    if (!name.includes(keyword) && !shortDesc.includes(keyword)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function sortFallbackProducts(products: AdminProductRecord[]) {
-  return [...products].sort((left, right) => {
-    const sortDelta = (left.sortOrder ?? 0) - (right.sortOrder ?? 0);
-    if (sortDelta !== 0) {
-      return sortDelta;
-    }
-
-    return (right.id ?? 0) - (left.id ?? 0);
-  });
-}
-
-function paginateFallbackProducts(products: AdminProductRecord[], filters: AdminProductListFilters) {
-  const total = products.length;
-  const page = Math.max(1, filters.page);
-  const pageSize = Math.max(1, filters.pageSize);
-  const fromIndex = Math.min((page - 1) * pageSize, total);
-  const toIndex = Math.min(fromIndex + pageSize, total);
-
-  return {
-    items: products.slice(fromIndex, toIndex),
-    total,
-    page,
-    pageSize
   };
 }
 
@@ -342,7 +201,7 @@ export async function loadAdminProductList(filters: AdminProductListFilters): Pr
     ]);
 
     return {
-      categories: normalizeCategoryOptions(categories.length > 0 ? categories : FALLBACK_CATEGORIES),
+      categories: normalizeCategoryOptions(categories),
       products: products.items,
       total: products.total,
       page: products.page,
@@ -351,17 +210,12 @@ export async function loadAdminProductList(filters: AdminProductListFilters): Pr
       error: null
     };
   } catch (error) {
-    const fallbackProducts = paginateFallbackProducts(
-      sortFallbackProducts(FALLBACK_PRODUCTS.filter((product) => matchesFallbackQuery(product, filters))),
-      filters
-    );
-
     return {
-      categories: normalizeCategoryOptions(FALLBACK_CATEGORIES),
-      products: fallbackProducts.items,
-      total: fallbackProducts.total,
-      page: fallbackProducts.page,
-      pageSize: fallbackProducts.pageSize,
+      categories: [],
+      products: [],
+      total: 0,
+      page: filters.page,
+      pageSize: filters.pageSize,
       source: "fallback",
       error: formatApiError(error)
     };
@@ -377,19 +231,17 @@ export async function loadAdminProductEditor(productId?: string): Promise<AdminP
     ]);
 
     return {
-      categories: normalizeCategoryOptions(categories.length > 0 ? categories : FALLBACK_CATEGORIES),
-      contacts: contacts.length > 0 ? contacts : FALLBACK_CONTACTS,
+      categories: normalizeCategoryOptions(categories),
+      contacts,
       product: product ?? null,
       source: "api",
       error: null
     };
   } catch (error) {
-    const fallbackProduct = productId ? FALLBACK_PRODUCTS.find((item) => String(item.id) === productId) ?? null : null;
-
     return {
-      categories: normalizeCategoryOptions(FALLBACK_CATEGORIES),
-      contacts: FALLBACK_CONTACTS,
-      product: fallbackProduct,
+      categories: [],
+      contacts: [],
+      product: null,
       source: "fallback",
       error: formatApiError(error)
     };

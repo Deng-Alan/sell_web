@@ -16,6 +16,7 @@ export type ShowcaseContactCard = {
   href: string;
   type: string;
   qrImage?: string | null;
+  displayPlaces: string[];
 };
 
 export type ShowcaseProductCard = {
@@ -85,177 +86,12 @@ export type PublicCatalogData = {
 };
 
 export type PublicProductPageData = {
-  product: ShowcaseProductDetail;
+  product: ShowcaseProductDetail | null;
   relatedProducts: ShowcaseProductCard[];
   categories: ShowcaseCategoryOption[];
   contacts: ShowcaseContactCard[];
   source: "api" | "fallback";
 };
-
-const FALLBACK_CATEGORIES: PublicCategoryRecord[] = [
-  {
-    id: 1,
-    name: "账号资源",
-    slug: "accounts",
-    sortOrder: 1,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 2,
-    name: "工具软件",
-    slug: "tools",
-    sortOrder: 2,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 3,
-    name: "资料内容",
-    slug: "data",
-    sortOrder: 3,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 4,
-    name: "网站模板",
-    slug: "web",
-    sortOrder: 4,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  }
-];
-
-const FALLBACK_CONTACTS: PublicContactRecord[] = [
-  {
-    id: 1,
-    type: "wechat",
-    name: "微信客服",
-    value: "wx-showcase-01",
-    qrImage: null,
-    jumpUrl: "https://example.com/contact/wechat",
-    displayPlaces: "首页、详情页",
-    sortOrder: 1,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 2,
-    type: "qq",
-    name: "QQ 客服",
-    value: "2088xxxx",
-    qrImage: null,
-    jumpUrl: "https://example.com/contact/qq",
-    displayPlaces: "首页、列表页",
-    sortOrder: 2,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  },
-  {
-    id: 4,
-    type: "email",
-    name: "邮箱",
-    value: "support@example.com",
-    qrImage: null,
-    jumpUrl: "mailto:support@example.com",
-    displayPlaces: "联系区",
-    sortOrder: 4,
-    status: 1,
-    createdAt: "2026-04-15 09:00:00",
-    updatedAt: "2026-04-15 09:00:00"
-  }
-];
-
-const FALLBACK_PRODUCTS: PublicProductRecord[] = [
-  {
-    id: 2401,
-    categoryId: 1,
-    categoryName: "账号资源",
-    contactId: 1,
-    contactName: "微信客服",
-    name: "Alpha Gmail 资源包",
-    coverImage: null,
-    shortDesc: "高质量Gmail账号资源包，适合营销推广和业务拓展使用。",
-    content:
-      "精选优质Gmail账号资源，经过严格筛选和验证，确保账号质量和稳定性。支持批量购买，提供完善的售后服务。",
-    price: 68,
-    originalPrice: 88,
-    stock: 24,
-    isRecommended: 1,
-    sortOrder: 1,
-    status: 1,
-    imageUrls: [],
-    createdAt: "2026-04-15 10:20:00",
-    updatedAt: "2026-04-15 10:20:00"
-  },
-  {
-    id: 2402,
-    categoryId: 2,
-    categoryName: "工具软件",
-    contactId: 3,
-    contactName: "Telegram",
-    name: "Beta 工具站套餐",
-    coverImage: null,
-    shortDesc: "专业工具软件套餐，包含多款实用工具，提升工作效率。",
-    content: "精选多款专业工具软件，涵盖办公、设计、开发等多个领域。一次购买，长期使用，性价比高。提供详细使用教程和技术支持。",
-    price: 128,
-    originalPrice: 168,
-    stock: 8,
-    isRecommended: 1,
-    sortOrder: 2,
-    status: 1,
-    imageUrls: [],
-    createdAt: "2026-04-15 09:48:00",
-    updatedAt: "2026-04-15 09:48:00"
-  },
-  {
-    id: 2403,
-    categoryId: 3,
-    categoryName: "资料内容",
-    contactId: 4,
-    contactName: "邮箱",
-    name: "Gamma 数据资料包",
-    coverImage: null,
-    shortDesc: "精选行业数据资料包，包含市场分析、行业报告等内容。",
-    content: "汇集行业权威数据和深度分析报告，帮助您快速了解市场动态和行业趋势。内容持续更新，确保信息时效性。",
-    price: 38,
-    originalPrice: null,
-    stock: 0,
-    isRecommended: 0,
-    sortOrder: 3,
-    status: 1,
-    imageUrls: [],
-    createdAt: "2026-04-14 18:12:00",
-    updatedAt: "2026-04-14 18:12:00"
-  },
-  {
-    id: 2404,
-    categoryId: 4,
-    categoryName: "网站模板",
-    contactId: 2,
-    contactName: "QQ 客服",
-    name: "Delta 展示站模板",
-    coverImage: null,
-    shortDesc: "精美网站展示模板，适合企业官网和产品展示使用。",
-    content: "专业设计的网站模板，响应式布局，支持多种设备访问。包含完整的页面结构和组件，易于定制和维护。提供详细的使用文档和技术支持。",
-    price: 198,
-    originalPrice: 256,
-    stock: 17,
-    isRecommended: 0,
-    sortOrder: 4,
-    status: 1,
-    imageUrls: [],
-    createdAt: "2026-04-15 08:05:00",
-    updatedAt: "2026-04-15 08:05:00"
-  }
-];
 
 const COVER_TONES = [
   "linear-gradient(135deg, #1d1511, #16211d, #22382f)",
@@ -340,42 +176,100 @@ function normalizeCategory(record: PublicCategoryRecord): ShowcaseCategoryOption
   };
 }
 
+function parseDisplayPlaces(value: string | null | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(/[,，|/]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function formatDisplayPlaces(value: string | null | undefined) {
-  return "在线咨询";
+  const places = parseDisplayPlaces(value);
+  return places.length > 0 ? `展示位置：${places.join(" / ")}` : "在线咨询";
+}
+
+function isUrl(value: string) {
+  return /^(https?:\/\/|mailto:|tel:)/i.test(value);
+}
+
+function normalizeTelegram(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (isUrl(trimmed)) {
+    return trimmed;
+  }
+  return `https://t.me/${trimmed.replace(/^@/, "")}`;
+}
+
+function buildContactHref(record: PublicContactRecord) {
+  const jumpUrl = record.jumpUrl?.trim();
+  if (jumpUrl) {
+    return jumpUrl;
+  }
+
+  const value = record.value?.trim() ?? "";
+  if (!value) {
+    return `#contact-${record.id}`;
+  }
+
+  switch (record.type) {
+    case "email":
+      return isUrl(value) ? value : `mailto:${value}`;
+    case "phone":
+      return isUrl(value) ? value : `tel:${value}`;
+    case "website":
+    case "link":
+      return isUrl(value) ? value : `#contact-${record.id}`;
+    case "telegram":
+      return normalizeTelegram(value);
+    default:
+      return `#contact-${record.id}`;
+  }
 }
 
 function normalizeContact(record: PublicContactRecord): ShowcaseContactCard {
-  const href = record.jumpUrl && record.jumpUrl.trim().length > 0 ? record.jumpUrl : `#contact-${record.id}`;
   return {
     id: String(record.id),
     label: record.name,
     value: record.value,
     hint: formatDisplayPlaces(record.displayPlaces),
-    href,
+    href: buildContactHref(record),
     type: record.type || "contact",
-    qrImage: record.qrImage
+    qrImage: record.qrImage,
+    displayPlaces: parseDisplayPlaces(record.displayPlaces)
   };
 }
 
-function resolveContact(cards: ShowcaseContactCard[], contactId: number | null, contactName: string | null) {
-  const byId = contactId ? cards.find((item) => item.id === String(contactId)) : undefined;
+function isContactVisibleAt(contact: ShowcaseContactCard, place: string) {
+  return contact.displayPlaces.length === 0 || contact.displayPlaces.includes(place);
+}
+
+function resolveContact(cards: ShowcaseContactCard[], contactId: number | null, contactName: string | null, place: string) {
+  const visibleCards = cards.filter((item) => isContactVisibleAt(item, place));
+  const byId = contactId ? visibleCards.find((item) => item.id === String(contactId)) : undefined;
   if (byId) {
     return byId;
   }
 
   if (contactName) {
-    const byLabel = cards.find((item) => item.label === contactName);
+    const byLabel = visibleCards.find((item) => item.label === contactName);
     if (byLabel) {
       return byLabel;
     }
   }
 
-  return cards[0];
+  return undefined;
 }
 
-function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseContactCard[]): ShowcaseProductCard {
+function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseContactCard[], contactPlace = "product"): ShowcaseProductCard {
   const categoryName = record.categoryName || "未分类";
-  const contact = resolveContact(contacts, record.contactId, record.contactName);
+  const contact = resolveContact(contacts, record.contactId, record.contactName, contactPlace);
   const stock = Math.max(0, Math.floor(toNumber(record.stock, 0)));
   const price = toNumber(record.price, 0);
   const originalPrice = record.originalPrice == null ? null : toNumber(record.originalPrice, 0);
@@ -399,7 +293,7 @@ function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseCon
       toFlag(record.isRecommended) ? "推荐位" : "常规位",
       stock > 0 ? `${stock} 件库存` : "售罄"
     ],
-    contactHref: contact?.href ?? "#contact",
+    contactHref: contact?.href ?? "/contact",
     badge: createBadge(record.name),
     coverTone: CATEGORY_TONES.get(categoryName) || pickTone(record.id.toString()),
     coverImage: record.coverImage
@@ -407,8 +301,8 @@ function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseCon
 }
 
 function normalizeProductDetail(record: PublicProductRecord, contacts: ShowcaseContactCard[]): ShowcaseProductDetail {
-  const card = normalizeProductCard(record, contacts);
-  const contact = resolveContact(contacts, record.contactId, record.contactName);
+  const card = normalizeProductCard(record, contacts, "detail");
+  const contact = resolveContact(contacts, record.contactId, record.contactName, "detail");
   const notes = [
     record.shortDesc ? `短说明：${record.shortDesc}` : "支持前台展示和咨询承接",
     record.content ? `内容摘要：${clampText(record.content.replace(/\s+/g, " ").trim(), 36)}` : "详情区已保留富文本承载位",
@@ -428,7 +322,7 @@ function normalizeProductDetail(record: PublicProductRecord, contacts: ShowcaseC
     ),
     contactName: contact?.label ?? record.contactName ?? "联系入口",
     contactValue: contact?.value ?? record.contactName ?? "未配置",
-    contactHint: contact?.hint ?? "支持人工咨询"
+    contactHint: contact?.hint ?? "查看联系方式页面获取可用咨询渠道"
   };
 }
 
@@ -506,19 +400,6 @@ function buildRelatedProducts(products: ShowcaseProductCard[], currentProduct: S
     .slice(0, 3);
 }
 
-function buildFallbackProduct(id: string, contacts: ShowcaseContactCard[]) {
-  const fallbackRecord = {
-    ...FALLBACK_PRODUCTS[0],
-    id: Number.isFinite(Number(id)) ? Number(id) : FALLBACK_PRODUCTS[0].id,
-    name: `商品 ${id}`,
-    shortDesc: `精选商品，编号 ${id}，欢迎咨询了解详情。`,
-    content: `优质商品，提供专业的售前咨询和完善的售后服务。如需了解更多信息，请通过联系方式与我们沟通。`,
-    contactId: FALLBACK_CONTACTS[0].id
-  };
-
-  return normalizeProductDetail(fallbackRecord, contacts);
-}
-
 export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise<PublicCatalogData> {
   const [categoryRecords, contactRecords, productRecords] = await Promise.all([
     fetchPublicArray<PublicCategoryRecord>("/public/categories"),
@@ -533,9 +414,9 @@ export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise
     )
   ]);
 
-  const categorySource = categoryRecords && categoryRecords.length > 0 ? categoryRecords : FALLBACK_CATEGORIES;
-  const contactSource = contactRecords && contactRecords.length > 0 ? contactRecords : FALLBACK_CONTACTS;
-  const productSource = productRecords ? productRecords.items : FALLBACK_PRODUCTS;
+  const categorySource = categoryRecords ?? [];
+  const contactSource = contactRecords ?? [];
+  const productSource = productRecords?.items ?? [];
 
   const categories = categorySource
     .filter((record) => toFlag(record.status))
@@ -559,9 +440,11 @@ export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise
 
   const products = applyCatalogFilters(allProducts, query);
   const totalStock = allProducts.reduce((sum, product) => sum + product.stock, 0);
-  const total = productRecords?.total ?? allProducts.length;
-  const page = productRecords?.page ?? 1;
-  const pageSize = productRecords?.pageSize ?? allProducts.length;
+  const currentPage = Math.max(1, Number(query.page || "1") || 1);
+  const currentPageSize = Math.max(1, Number(query.pageSize || "9") || 9);
+  const total = productRecords?.total ?? 0;
+  const page = productRecords?.page ?? currentPage;
+  const pageSize = productRecords?.pageSize ?? currentPageSize;
 
   return {
     products,
@@ -592,9 +475,9 @@ export async function loadPublicProductPage(id: string): Promise<PublicProductPa
     fetchPublicCollection<PublicProductRecord>("/public/products?page=1&pageSize=100")
   ]);
 
-  const categorySource = categoryRecords && categoryRecords.length > 0 ? categoryRecords : FALLBACK_CATEGORIES;
-  const contactSource = contactRecords && contactRecords.length > 0 ? contactRecords : FALLBACK_CONTACTS;
-  const listSource = listRecords ? listRecords.items : FALLBACK_PRODUCTS;
+  const categorySource = categoryRecords ?? [];
+  const contactSource = contactRecords ?? [];
+  const listSource = listRecords?.items ?? [];
 
   const categories = categorySource
     .filter((record) => toFlag(record.status))
@@ -621,16 +504,16 @@ export async function loadPublicProductPage(id: string): Promise<PublicProductPa
     ? normalizeProductDetail(productRecords, contacts)
     : matchedListRecord
       ? normalizeProductDetail(matchedListRecord, contacts)
-      : buildFallbackProduct(id, contacts);
+      : null;
 
-  const relatedProducts = buildRelatedProducts(allProducts, product);
+  const relatedProducts = product ? buildRelatedProducts(allProducts, product) : [];
 
   return {
     product,
     relatedProducts,
     categories,
     contacts,
-    source: productRecords ? "api" : "fallback"
+    source: product || listRecords ? "api" : "fallback"
   };
 }
 
