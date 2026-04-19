@@ -94,6 +94,13 @@ export type PublicProductPageData = {
   source: "api" | "fallback";
 };
 
+export type PublicCatalogSnapshot = {
+  products: ShowcaseProductCard[];
+  categories: ShowcaseCategoryOption[];
+  contacts: ShowcaseContactCard[];
+  source: "api" | "fallback";
+};
+
 const COVER_TONES = [
   "linear-gradient(135deg, #1d1511, #16211d, #22382f)",
   "linear-gradient(135deg, #a94f1d, #8c3f22, #1f1f1f)",
@@ -328,7 +335,7 @@ function normalizeProductDetail(record: PublicProductRecord, contacts: ShowcaseC
   };
 }
 
-function applyCatalogFilters(products: ShowcaseProductCard[], query: PublicCatalogQuery) {
+export function applyCatalogFilters(products: ShowcaseProductCard[], query: PublicCatalogQuery) {
   const keyword = query.keyword?.trim().toLowerCase() ?? "";
   const categoryId = query.categoryId?.trim() ?? "";
   const stockFilter = query.stock?.trim() ?? "";
@@ -349,6 +356,66 @@ function applyCatalogFilters(products: ShowcaseProductCard[], query: PublicCatal
 
     return matchesKeyword && matchesCategory && matchesStock;
   });
+}
+
+async function fetchAllPublicProducts() {
+  const firstPage = await fetchPublicCollection<PublicProductRecord>("/public/products?page=1&pageSize=100");
+  if (!firstPage) {
+    return null;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(firstPage.total / Math.max(1, firstPage.pageSize || 100)));
+  if (totalPages <= 1) {
+    return firstPage.items;
+  }
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      fetchPublicCollection<PublicProductRecord>(`/public/products?page=${index + 2}&pageSize=100`)
+    )
+  );
+
+  return [firstPage, ...remainingPages]
+    .flatMap((page) => page?.items ?? []);
+}
+
+function sortPublicProducts(products: ShowcaseProductCard[]) {
+  return products.sort((left, right) => {
+    const orderDelta = Number(left.featured) - Number(right.featured);
+    if (orderDelta !== 0) {
+      return orderDelta * -1;
+    }
+    return right.stock - left.stock || left.name.localeCompare(right.name);
+  });
+}
+
+function normalizePublicCatalogSnapshot(
+  categoryRecords: PublicCategoryRecord[] | null,
+  contactRecords: PublicContactRecord[] | null,
+  productRecords: PublicProductRecord[] | null
+): PublicCatalogSnapshot {
+  const categorySource = categoryRecords ?? [];
+  const contactSource = contactRecords ?? [];
+  const productSource = productRecords ?? [];
+
+  const categories = categorySource
+    .filter((record) => toFlag(record.status))
+    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
+    .map(normalizeCategory);
+
+  const contacts = contactSource
+    .filter((record) => toFlag(record.status))
+    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
+    .map(normalizeContact);
+
+  const products = sortPublicProducts(productSource.map((record) => normalizeProductCard(record, contacts)));
+
+  return {
+    products,
+    categories,
+    contacts,
+    source: productRecords ? "api" : "fallback"
+  };
 }
 
 async function fetchPublicArray<T>(path: string) {
@@ -461,29 +528,8 @@ export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise
     )
   ]);
 
-  const categorySource = categoryRecords ?? [];
-  const contactSource = contactRecords ?? [];
-  const productSource = productRecords?.items ?? [];
-
-  const categories = categorySource
-    .filter((record) => toFlag(record.status))
-    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
-    .map(normalizeCategory);
-
-  const contacts = contactSource
-    .filter((record) => toFlag(record.status))
-    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
-    .map(normalizeContact);
-
-  const allProducts = productSource
-    .map((record) => normalizeProductCard(record, contacts))
-    .sort((left, right) => {
-      const orderDelta = Number(left.featured) - Number(right.featured);
-      if (orderDelta !== 0) {
-        return orderDelta * -1;
-      }
-      return right.stock - left.stock || left.name.localeCompare(right.name);
-    });
+  const snapshot = normalizePublicCatalogSnapshot(categoryRecords, contactRecords, productRecords?.items ?? null);
+  const allProducts = snapshot.products;
 
   const products = applyCatalogFilters(allProducts, query);
   const totalStock = allProducts.reduce((sum, product) => sum + product.stock, 0);
@@ -495,8 +541,8 @@ export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise
 
   return {
     products,
-    categories,
-    contacts,
+    categories: snapshot.categories,
+    contacts: snapshot.contacts,
     pagination: {
       total,
       page,
@@ -510,8 +556,23 @@ export async function loadPublicCatalog(query: PublicCatalogQuery = {}): Promise
       featuredCount: allProducts.filter((product) => product.featured).length,
       soldOutCount: allProducts.filter((product) => product.stock === 0).length
     },
-    source: productRecords ? "api" : "fallback"
+    source: snapshot.source
   };
+}
+
+export async function loadPublicCatalogSnapshot(): Promise<PublicCatalogSnapshot> {
+  const [categoryRecords, contactRecords, productRecords] = await Promise.all([
+    fetchPublicArray<PublicCategoryRecord>("/public/categories"),
+    fetchPublicArray<PublicContactRecord>("/public/contacts"),
+    fetchAllPublicProducts()
+  ]);
+
+  return normalizePublicCatalogSnapshot(categoryRecords, contactRecords, productRecords);
+}
+
+export async function loadPublicProductIds() {
+  const productRecords = await fetchAllPublicProducts();
+  return (productRecords ?? []).map((record) => String(record.id));
 }
 
 export async function loadPublicProductPage(id: string): Promise<PublicProductPageData> {
@@ -519,38 +580,16 @@ export async function loadPublicProductPage(id: string): Promise<PublicProductPa
     fetchPublicArray<PublicCategoryRecord>("/public/categories"),
     fetchPublicArray<PublicContactRecord>("/public/contacts"),
     fetchPublicItem<PublicProductRecord>(`/public/products/${encodeURIComponent(id)}`),
-    fetchPublicCollection<PublicProductRecord>("/public/products?page=1&pageSize=100")
+    fetchAllPublicProducts()
   ]);
 
-  const categorySource = categoryRecords ?? [];
-  const contactSource = contactRecords ?? [];
-  const listSource = listRecords?.items ?? [];
-
-  const categories = categorySource
-    .filter((record) => toFlag(record.status))
-    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
-    .map(normalizeCategory);
-
-  const contacts = contactSource
-    .filter((record) => toFlag(record.status))
-    .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.id - right.id)
-    .map(normalizeContact);
-
-  const allProducts = listSource
-    .map((record) => normalizeProductCard(record, contacts))
-    .sort((left, right) => {
-      const orderDelta = Number(left.featured) - Number(right.featured);
-      if (orderDelta !== 0) {
-        return orderDelta * -1;
-      }
-      return right.stock - left.stock || left.name.localeCompare(right.name);
-    });
-
-  const matchedListRecord = listSource.find((record) => String(record.id) === id);
+  const snapshot = normalizePublicCatalogSnapshot(categoryRecords, contactRecords, listRecords);
+  const allProducts = snapshot.products;
+  const matchedListRecord = (listRecords ?? []).find((record) => String(record.id) === id);
   const product = productRecords
-    ? normalizeProductDetail(productRecords, contacts)
+    ? normalizeProductDetail(productRecords, snapshot.contacts)
     : matchedListRecord
-      ? normalizeProductDetail(matchedListRecord, contacts)
+      ? normalizeProductDetail(matchedListRecord, snapshot.contacts)
       : null;
 
   const relatedProducts = product ? buildRelatedProducts(allProducts, product) : [];
@@ -558,8 +597,8 @@ export async function loadPublicProductPage(id: string): Promise<PublicProductPa
   return {
     product,
     relatedProducts,
-    categories,
-    contacts,
+    categories: snapshot.categories,
+    contacts: snapshot.contacts,
     source: product || listRecords ? "api" : "fallback"
   };
 }

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { formatCurrency, loadPublicProductPage, type ShowcaseProductDetail } from "@/lib/public-catalog";
+import { formatCurrency, loadPublicProductIds, loadPublicProductPage, type ShowcaseProductDetail } from "@/lib/public-catalog";
 
 export const revalidate = 60;
+export const dynamicParams = true;
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -30,6 +31,11 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   }
 
   return buildProductMetadata(product, id);
+}
+
+export async function generateStaticParams() {
+  const ids = await loadPublicProductIds();
+  return ids.map((id) => ({ id }));
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
