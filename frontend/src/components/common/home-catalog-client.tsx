@@ -162,11 +162,9 @@ export function HomeCatalogClient({ snapshot }: HomeCatalogClientProps) {
     >
       <div className="flex flex-col gap-4 border-b border-[var(--line)] pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.28em] text-[var(--accent)]">Filter</p>
-          <h2 className="text-2xl font-semibold text-[var(--ink)]">筛选商品</h2>
-          <p className="max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            使用关键词快速筛选，页面切换只在浏览器内完成，不再触发服务端重新渲染。
-          </p>
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-[var(--accent)]">Search</p>
+          <h2 className="text-2xl font-semibold text-[var(--ink)]">搜索商品</h2>
+          <p className="max-w-2xl text-sm leading-6 text-[var(--muted)]">输入关键词，快速找到想看的商品。</p>
         </div>
       </div>
 
@@ -188,7 +186,7 @@ export function HomeCatalogClient({ snapshot }: HomeCatalogClientProps) {
             type="submit"
             className="w-full rounded-2xl bg-[var(--ink)] px-4 py-3 text-sm font-medium text-white transition hover:bg-[#1d1d1d]"
           >
-            应用筛选
+            搜索
           </button>
         </div>
       </form>
@@ -216,7 +214,7 @@ export function HomeCatalogClient({ snapshot }: HomeCatalogClientProps) {
           <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
             {isServiceUnavailable
               ? "请确认后端服务已启动，或稍后刷新页面重试。"
-              : "请尝试调整关键词、分类或库存筛选条件。"}
+              : "请尝试更换关键词，或直接返回全部商品。"}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <button

@@ -15,12 +15,15 @@ import com.example.sellweb.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +39,10 @@ public class ProductService {
     private static final String PRODUCTS_TAG = "public:products";
     private static final String CATEGORIES_TAG = "public:categories";
     private static final String CONTACTS_TAG = "public:contacts";
+    private static final String PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
+    private static final String PUBLIC_UPLOAD_PATH_PREFIX_WITHOUT_SLASH = "api/admin/uploads/files/";
+    private static final Set<String> BLOCKED_PRODUCT_IMAGE_HOSTS = Set.of("localhost", "127.0.0.1", "::1", "backend");
+    private static final String PRODUCT_IMAGE_ERROR_MESSAGE = "商品图片必须使用站内上传地址或公开可访问的 http/https 地址";
 
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
@@ -195,7 +202,7 @@ public class ProductService {
         product.setCategory(category);
         product.setName(request.getName());
         if (isCreate || request.getCoverImage() != null) {
-            product.setCoverImage(request.getCoverImage());
+            product.setCoverImage(normalizeProductImage(request.getCoverImage()));
         }
         if (isCreate || request.getShortDesc() != null) {
             product.setShortDesc(request.getShortDesc());
@@ -231,9 +238,10 @@ public class ProductService {
     }
 
     private void replaceImages(Long productId, List<String> imageUrls) {
+        List<String> normalizedImageUrls = normalizeProductImageUrls(imageUrls);
         productImageRepository.deleteByProductId(productId);
 
-        if (imageUrls == null || imageUrls.isEmpty()) {
+        if (normalizedImageUrls == null || normalizedImageUrls.isEmpty()) {
             return;
         }
 
@@ -241,10 +249,10 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
 
         List<ProductImage> images = new ArrayList<>();
-        for (int i = 0; i < imageUrls.size(); i++) {
+        for (int i = 0; i < normalizedImageUrls.size(); i++) {
             ProductImage image = new ProductImage();
             image.setProduct(product);
-            image.setImageUrl(imageUrls.get(i));
+            image.setImageUrl(normalizedImageUrls.get(i));
             image.setSortOrder(i);
             images.add(image);
         }
@@ -259,7 +267,7 @@ public class ProductService {
         response.setContactId(product.getContact() != null ? product.getContact().getId() : null);
         response.setContactName(product.getContact() != null ? product.getContact().getName() : null);
         response.setName(product.getName());
-        response.setCoverImage(product.getCoverImage());
+        response.setCoverImage(normalizePublicImageForResponse(product.getCoverImage()));
         response.setShortDesc(product.getShortDesc());
         response.setContent(product.getContent());
         response.setPrice(product.getPrice());
@@ -278,7 +286,87 @@ public class ProductService {
         return productImageRepository.findByProductIdOrderBySortOrderAsc(productId)
                 .stream()
                 .map(ProductImage::getImageUrl)
+                .map(this::normalizePublicImageForResponse)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    private List<String> normalizeProductImageUrls(List<String> imageUrls) {
+        if (imageUrls == null) {
+            return null;
+        }
+
+        return imageUrls.stream()
+                .map(this::normalizeProductImage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private String normalizeProductImage(String value) {
+        String normalized = normalizeNullable(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        validateProductImage(normalized);
+        return normalized;
+    }
+
+    private void validateProductImage(String imageUrl) {
+        if (imageUrl.startsWith(PUBLIC_UPLOAD_PATH_PREFIX)) {
+            return;
+        }
+
+        URI uri;
+        try {
+            uri = URI.create(imageUrl);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException(PRODUCT_IMAGE_ERROR_MESSAGE);
+        }
+
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (scheme == null || host == null || host.isBlank()) {
+            throw new IllegalArgumentException(PRODUCT_IMAGE_ERROR_MESSAGE);
+        }
+
+        String normalizedScheme = scheme.toLowerCase(Locale.ROOT);
+        if (!normalizedScheme.equals("http") && !normalizedScheme.equals("https")) {
+            throw new IllegalArgumentException(PRODUCT_IMAGE_ERROR_MESSAGE);
+        }
+
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+        if (BLOCKED_PRODUCT_IMAGE_HOSTS.contains(normalizedHost)) {
+            throw new IllegalArgumentException("商品图片不能使用本机或内网地址，请改用站内上传地址或公开域名");
+        }
+    }
+
+    private String normalizePublicImageForResponse(String value) {
+        String normalized = normalizeNullable(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        int publicPathIndex = normalized.indexOf(PUBLIC_UPLOAD_PATH_PREFIX);
+        if (publicPathIndex >= 0) {
+            return normalized.substring(publicPathIndex);
+        }
+
+        int publicPathWithoutSlashIndex = normalized.indexOf(PUBLIC_UPLOAD_PATH_PREFIX_WITHOUT_SLASH);
+        if (publicPathWithoutSlashIndex >= 0) {
+            return "/" + normalized.substring(publicPathWithoutSlashIndex);
+        }
+
+        return normalized;
+    }
+
+    private String normalizeNullable(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private Comparator<Product> productComparator() {

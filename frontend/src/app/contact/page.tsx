@@ -35,13 +35,10 @@ export default async function ContactPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {catalog.contacts.length > 0 ? (
             catalog.contacts.map((contact) => {
-              return (
-                <a
-                  key={contact.id}
-                  id={`contact-${contact.id}`}
-                  href={contact.href}
-                  className="group rounded-[1.8rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
-                >
+              const isActionable = !contact.href.startsWith(`#contact-${contact.id}`);
+              const ctaLabel = isActionable ? "立即前往" : contact.qrImage ? "扫码添加" : "在线咨询";
+              const cardBody = (
+                <>
                   <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">{contact.label}</p>
                   <p className="mt-3 text-lg font-semibold text-[var(--ink)]">{contact.value}</p>
                   <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
@@ -56,9 +53,38 @@ export default async function ContactPage() {
                       />
                     </div>
                   ) : null}
-                  <span className="mt-5 inline-flex rounded-full border border-[var(--line)] px-3 py-1 text-xs font-medium text-[var(--ink)] transition group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
-                    立即前往
+                  <span
+                    className={`mt-5 inline-flex rounded-full border px-3 py-1 text-xs font-medium ${
+                      isActionable
+                        ? "border-[var(--line)] text-[var(--ink)] transition group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]"
+                        : "border-[rgba(169,79,29,0.18)] bg-[rgba(169,79,29,0.08)] text-[var(--accent)]"
+                    }`}
+                  >
+                    {ctaLabel}
                   </span>
+                </>
+              );
+
+              if (!isActionable) {
+                return (
+                  <article
+                    key={contact.id}
+                    id={`contact-${contact.id}`}
+                    className="rounded-[1.8rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)]"
+                  >
+                    {cardBody}
+                  </article>
+                );
+              }
+
+              return (
+                <a
+                  key={contact.id}
+                  id={`contact-${contact.id}`}
+                  href={contact.href}
+                  className="group rounded-[1.8rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)] transition hover:-translate-y-1 hover:border-[var(--accent)]"
+                >
+                  {cardBody}
                 </a>
               );
             })

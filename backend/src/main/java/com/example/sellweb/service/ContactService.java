@@ -36,6 +36,7 @@ public class ContactService {
     private static final String CONTACTS_TAG = "public:contacts";
     private static final String HOME_TAG = "public:home";
     private static final String PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
+    private static final String PUBLIC_UPLOAD_PATH_PREFIX_WITHOUT_SLASH = "api/admin/uploads/files/";
     private static final Set<String> BLOCKED_QR_IMAGE_HOSTS = Set.of("localhost", "127.0.0.1", "::1", "backend");
     private static final String QR_IMAGE_ERROR_MESSAGE = "二维码图片必须使用站内上传地址或公开可访问的 http/https 地址";
 
@@ -176,7 +177,7 @@ public class ContactService {
         response.setType(contact.getType());
         response.setName(contact.getName());
         response.setValue(contact.getValue());
-        response.setQrImage(contact.getQrImage());
+        response.setQrImage(normalizePublicQrImageForResponse(contact.getQrImage()));
         response.setJumpUrl(contact.getJumpUrl());
         response.setDisplayPlaces(contact.getDisplayPlaces());
         response.setSortOrder(contact.getSortOrder());
@@ -256,5 +257,24 @@ public class ContactService {
         if (BLOCKED_QR_IMAGE_HOSTS.contains(normalizedHost)) {
             throw new IllegalArgumentException("二维码图片不能使用本机或内网地址，请改用站内上传地址或公开域名");
         }
+    }
+
+    private String normalizePublicQrImageForResponse(String value) {
+        String normalized = normalizeNullable(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        int publicPathIndex = normalized.indexOf(PUBLIC_UPLOAD_PATH_PREFIX);
+        if (publicPathIndex >= 0) {
+            return normalized.substring(publicPathIndex);
+        }
+
+        int publicPathWithoutSlashIndex = normalized.indexOf(PUBLIC_UPLOAD_PATH_PREFIX_WITHOUT_SLASH);
+        if (publicPathWithoutSlashIndex >= 0) {
+            return "/" + normalized.substring(publicPathWithoutSlashIndex);
+        }
+
+        return normalized;
     }
 }

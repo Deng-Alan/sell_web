@@ -52,6 +52,10 @@ export type AdminProductEditorViewModel = {
   error: string | null;
 };
 
+const PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
+const BLOCKED_PRODUCT_IMAGE_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "backend"]);
+const PRODUCT_IMAGE_ERROR_MESSAGE = "商品图片必须使用站内上传地址或公开可访问的 http/https 地址";
+
 function toOption(record: AdminCategoryRecord): AdminCategoryOption {
   return {
     label: record.name,
@@ -87,6 +91,36 @@ function parseNumberInput(value: string) {
 function parseIntegerInput(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? Number.parseInt(trimmed, 10) : null;
+}
+
+function trimOrNull(value: string) {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function validateProductImageUrl(value: string | null) {
+  if (!value) {
+    return;
+  }
+
+  if (value.startsWith(PUBLIC_UPLOAD_PATH_PREFIX)) {
+    return;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(PRODUCT_IMAGE_ERROR_MESSAGE);
+  }
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(PRODUCT_IMAGE_ERROR_MESSAGE);
+  }
+
+  if (BLOCKED_PRODUCT_IMAGE_HOSTS.has(url.hostname.toLowerCase())) {
+    throw new Error("商品图片不能使用本机或内网地址，请改用站内上传地址或公开域名");
+  }
 }
 
 function normalizeProductFormState(product: AdminProductRecord | null): AdminProductFormState {
@@ -127,15 +161,19 @@ function normalizeFormPayload(state: AdminProductFormState): AdminProductUpsertI
   const sortOrder = parseIntegerInput(state.sortOrder);
   const isRecommended = state.isRecommended === "1" ? 1 : 0;
   const status = state.status === "1" ? 1 : 0;
+  const coverImage = trimOrNull(state.coverImage);
   const imageUrls = state.imageUrlsText
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
 
+  validateProductImageUrl(coverImage);
+  imageUrls.forEach((imageUrl) => validateProductImageUrl(imageUrl));
+
   return {
     categoryId,
     name: state.name.trim(),
-    coverImage: state.coverImage.trim() || null,
+    coverImage,
     shortDesc: state.shortDesc.trim() || null,
     content: state.content.trim() || null,
     price,
