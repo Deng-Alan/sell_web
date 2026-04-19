@@ -18,25 +18,25 @@
     --font-body: "Avenir Next", "Segoe UI", "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 
     /* shadcn/ui 颜色变量 - 深色主题 */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 186 100% 50%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 186 100% 50%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 186 100% 50%;
+    --ui-background: 222.2 84% 4.9%;
+    --ui-foreground: 210 40% 98%;
+    --ui-card: 222.2 84% 4.9%;
+    --ui-card-foreground: 210 40% 98%;
+    --ui-popover: 222.2 84% 4.9%;
+    --ui-popover-foreground: 210 40% 98%;
+    --ui-primary: 186 100% 50%;
+    --ui-primary-foreground: 222.2 47.4% 11.2%;
+    --ui-secondary: 217.2 32.6% 17.5%;
+    --ui-secondary-foreground: 210 40% 98%;
+    --ui-muted: 217.2 32.6% 17.5%;
+    --ui-muted-foreground: 215 20.2% 65.1%;
+    --ui-accent: 186 100% 50%;
+    --ui-accent-foreground: 222.2 47.4% 11.2%;
+    --ui-destructive: 0 62.8% 30.6%;
+    --ui-destructive-foreground: 210 40% 98%;
+    --ui-border: 217.2 32.6% 17.5%;
+    --ui-input: 217.2 32.6% 17.5%;
+    --ui-ring: 186 100% 50%;
     --radius: 0.5rem;
   }
 }
