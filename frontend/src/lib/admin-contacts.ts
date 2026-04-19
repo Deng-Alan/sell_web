@@ -52,6 +52,10 @@ export type ContactListViewModel = {
   source: "api";
 };
 
+const PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
+const BLOCKED_QR_IMAGE_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "backend"]);
+const QR_IMAGE_ERROR_MESSAGE = "二维码图片必须使用站内上传地址或公开可访问的 http/https 地址";
+
 function unwrapApiResponse<T>(response: ApiResponse<T>, fallbackMessage: string) {
   if (!response.success) {
     throw new Error(response.message || fallbackMessage);
@@ -73,6 +77,31 @@ function parseInteger(value: string) {
 function trimOrNull(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function validateQrImage(value: string | null) {
+  if (!value) {
+    return;
+  }
+
+  if (value.startsWith(PUBLIC_UPLOAD_PATH_PREFIX)) {
+    return;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(QR_IMAGE_ERROR_MESSAGE);
+  }
+
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(QR_IMAGE_ERROR_MESSAGE);
+  }
+
+  if (BLOCKED_QR_IMAGE_HOSTS.has(url.hostname.toLowerCase())) {
+    throw new Error("二维码图片不能使用本机或内网地址，请改用站内上传地址或公开域名");
+  }
 }
 
 export function createEmptyContactFormState(): ContactFormState {
@@ -108,12 +137,15 @@ export function createContactFormState(contact: ContactRecord | null): ContactFo
 export function buildContactPayload(state: ContactFormState): ContactUpsertInput {
   const sortOrder = parseInteger(state.sortOrder);
   const status = state.status === "0" ? 0 : 1;
+  const qrImage = trimOrNull(state.qrImage);
+
+  validateQrImage(qrImage);
 
   return {
     type: state.type.trim(),
     name: state.name.trim(),
     value: state.value.trim(),
-    qrImage: trimOrNull(state.qrImage),
+    qrImage,
     jumpUrl: trimOrNull(state.jumpUrl),
     displayPlaces: trimOrNull(state.displayPlaces),
     sortOrder,

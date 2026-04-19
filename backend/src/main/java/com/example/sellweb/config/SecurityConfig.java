@@ -69,6 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/admin/uploads/files/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/admin/uploads/files/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 // 其他接口需要认证
                 .anyRequest().authenticated()

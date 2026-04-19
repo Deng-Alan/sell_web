@@ -115,6 +115,7 @@ const CATEGORY_TONES = new Map<string, string>([
   ["网站模板", COVER_TONES[3]]
 ]);
 const PUBLIC_DATA_REVALIDATE_SECONDS = 60;
+const PUBLIC_CONTACT_HINT = "在线咨询";
 
 function buildQueryString(params?: Record<string, string | undefined>) {
   if (!params) {
@@ -196,11 +197,6 @@ function parseDisplayPlaces(value: string | null | undefined) {
     .filter(Boolean);
 }
 
-function formatDisplayPlaces(value: string | null | undefined) {
-  const places = parseDisplayPlaces(value);
-  return places.length > 0 ? `展示位置：${places.join(" / ")}` : "在线咨询";
-}
-
 function isUrl(value: string) {
   return /^(https?:\/\/|mailto:|tel:)/i.test(value);
 }
@@ -247,7 +243,7 @@ function normalizeContact(record: PublicContactRecord): ShowcaseContactCard {
     id: String(record.id),
     label: record.name,
     value: record.value,
-    hint: formatDisplayPlaces(record.displayPlaces),
+    hint: PUBLIC_CONTACT_HINT,
     href: buildContactHref(record),
     type: record.type || "contact",
     qrImage: record.qrImage,

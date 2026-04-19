@@ -7,7 +7,9 @@ import com.example.sellweb.repository.ContactRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +35,9 @@ public class ContactService {
     private static final String PRODUCTS_TAG = "public:products";
     private static final String CONTACTS_TAG = "public:contacts";
     private static final String HOME_TAG = "public:home";
+    private static final String PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
+    private static final Set<String> BLOCKED_QR_IMAGE_HOSTS = Set.of("localhost", "127.0.0.1", "::1", "backend");
+    private static final String QR_IMAGE_ERROR_MESSAGE = "二维码图片必须使用站内上传地址或公开可访问的 http/https 地址";
 
     private final ContactRepository contactRepository;
     private final FrontendRevalidationService frontendRevalidationService;
@@ -153,7 +158,7 @@ public class ContactService {
         contact.setType(normalizeType(request.getType()));
         contact.setName(request.getName().trim());
         contact.setValue(request.getValue().trim());
-        contact.setQrImage(normalizeNullable(request.getQrImage()));
+        contact.setQrImage(normalizeQrImage(request.getQrImage()));
         contact.setJumpUrl(normalizeNullable(request.getJumpUrl()));
         contact.setDisplayPlaces(normalizeNullable(request.getDisplayPlaces()));
 
@@ -212,5 +217,44 @@ public class ContactService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeQrImage(String value) {
+        String normalized = normalizeNullable(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        validateQrImage(normalized);
+        return normalized;
+    }
+
+    private void validateQrImage(String qrImage) {
+        if (qrImage.startsWith(PUBLIC_UPLOAD_PATH_PREFIX)) {
+            return;
+        }
+
+        URI uri;
+        try {
+            uri = URI.create(qrImage);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException(QR_IMAGE_ERROR_MESSAGE);
+        }
+
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (scheme == null || host == null || host.isBlank()) {
+            throw new IllegalArgumentException(QR_IMAGE_ERROR_MESSAGE);
+        }
+
+        String normalizedScheme = scheme.toLowerCase(Locale.ROOT);
+        if (!normalizedScheme.equals("http") && !normalizedScheme.equals("https")) {
+            throw new IllegalArgumentException(QR_IMAGE_ERROR_MESSAGE);
+        }
+
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+        if (BLOCKED_QR_IMAGE_HOSTS.contains(normalizedHost)) {
+            throw new IllegalArgumentException("二维码图片不能使用本机或内网地址，请改用站内上传地址或公开域名");
+        }
     }
 }

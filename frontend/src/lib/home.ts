@@ -193,7 +193,7 @@ function buildChannels(contacts: HomeContact[]) {
 
   return contacts.slice(0, 3).map((contact) => ({
     label: contact.name?.trim() || contactTypeLabel(contact.type),
-    hint: contact.value?.trim() || contact.displayPlaces?.trim() || "主联络入口"
+    hint: contact.value?.trim() || "在线咨询"
   }));
 }
 
