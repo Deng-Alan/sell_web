@@ -312,6 +312,8 @@ function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseCon
 function normalizeProductDetail(record: PublicProductRecord, contacts: ShowcaseContactCard[]): ShowcaseProductDetail {
   const card = normalizeProductCard(record, contacts, "detail");
   const contact = resolveContact(contacts, record.contactId, record.contactName, "detail");
+  const summary = record.shortDesc?.trim() || record.content?.trim() || card.summary;
+  const description = record.content?.trim() || record.shortDesc?.trim() || card.summary;
   const notes = [
     record.shortDesc ? `短说明：${record.shortDesc}` : "支持前台展示和咨询承接",
     record.content ? `内容摘要：${clampText(record.content.replace(/\s+/g, " ").trim(), 36)}` : "详情区已保留富文本承载位",
@@ -321,7 +323,8 @@ function normalizeProductDetail(record: PublicProductRecord, contacts: ShowcaseC
 
   return {
     ...card,
-    description: record.content || record.shortDesc || card.summary,
+    summary,
+    description,
     notes,
     galleryUrls: (record.imageUrls || []).filter(Boolean),
     seoTitle: `${record.name} | 商品详情`,
@@ -607,6 +610,7 @@ export function formatCurrency(value: number) {
   return new Intl.NumberFormat("zh-CN", {
     style: "currency",
     currency: "CNY",
-    maximumFractionDigits: 0
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(value);
 }

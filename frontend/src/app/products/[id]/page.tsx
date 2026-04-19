@@ -120,8 +120,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl lg:text-6xl">{product.name}</h1>
-                  <p className="max-w-2xl text-sm leading-7 text-white/80 sm:text-base">{product.description}</p>
+                  <h1 className="max-w-3xl break-words text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">{product.name}</h1>
+                  <p className="max-w-3xl whitespace-pre-line break-words text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
+                    {product.description}
+                  </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
@@ -220,11 +222,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Detail</p>
             <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">详情信息区</h2>
             <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--muted)]">
-              <p>{product.summary}</p>
+              <p className="whitespace-pre-line break-words text-[15px] leading-8">{product.summary}</p>
 
               <div className="rounded-3xl border border-[var(--line)] bg-white p-5">
                 <p className="text-sm font-medium text-[var(--ink)]">商品说明</p>
-                <p className="mt-3 leading-7">{product.description}</p>
+                <p className="mt-3 whitespace-pre-line break-words text-[15px] leading-8 text-[var(--muted)]">{product.description}</p>
               </div>
             </div>
           </article>

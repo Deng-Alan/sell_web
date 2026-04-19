@@ -449,19 +449,21 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
 
             <AdminPanel title="价格与库存" description="这些字段用于前台价格和库存展示。">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <AdminField label="售价" hint="商品实际售价。" required>
+                <AdminField label="售价" hint="商品实际售价，支持两位小数。" required>
                   <input
                     className="admin-input"
-                    placeholder="18"
+                    placeholder="18.00"
+                    inputMode="decimal"
                     value={form.price}
                     onChange={(event) => updateField("price", event.target.value)}
                     disabled={loading || editRecordMissing}
                   />
                 </AdminField>
-                <AdminField label="原价" hint="可为空，用于展示划线价。">
+                <AdminField label="原价" hint="可为空，用于展示划线价，支持两位小数。">
                   <input
                     className="admin-input"
-                    placeholder="30"
+                    placeholder="30.00"
+                    inputMode="decimal"
                     value={form.originalPrice}
                     onChange={(event) => updateField("originalPrice", event.target.value)}
                     disabled={loading || editRecordMissing}
