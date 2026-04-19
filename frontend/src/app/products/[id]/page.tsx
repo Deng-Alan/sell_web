@@ -55,7 +55,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
 
           <section className="rounded-[2rem] border border-[var(--line)] bg-white px-6 py-12 text-center shadow-[0_18px_60px_rgba(16,16,16,0.08)] sm:px-8">
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Unavailable</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">商品状态</p>
             <h1 className="mt-3 text-3xl font-semibold text-[var(--ink)]">商品详情暂时不可用</h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
               {source === "fallback"
@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 href="/contact"
                 className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#1d1d1d]"
               >
-                联系我们
+                联系购买
               </Link>
             </div>
           </section>
@@ -111,18 +111,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(169,79,29,0.26),transparent_30%)]" />
               <div className="absolute inset-0 bg-black/28" />
               <div className="relative flex h-full flex-col gap-6">
-                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.28em] text-white/78">
+                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.28em] text-white/78">
                   <span>{product.categoryName}</span>
-                  <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 tracking-[0.18em]">
-                    商品详情
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 tracking-[0.18em]">{product.sku}</span>
+                  <span className="h-1 w-1 rounded-full bg-white/50" />
+                  <span>{product.sku}</span>
                 </div>
 
                 <div className="space-y-4">
                   <h1 className="max-w-3xl break-words text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">{product.name}</h1>
                   <p className="max-w-3xl whitespace-pre-line break-words text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
-                    {product.description}
+                    {product.summary}
                   </p>
                 </div>
 
@@ -132,26 +130,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <HeroStat label="推荐位" value={product.featured ? "开启" : "关闭"} />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-xs uppercase tracking-[0.25em] text-white/60">封面图片</p>
-                    {product.coverImage ? (
-                      <div className="mt-3 overflow-hidden rounded-2xl border border-white/10">
-                        <img
-                          src={product.coverImage}
-                          alt={product.name}
-                          className="h-40 w-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    ) : (
-                      <p className="mt-2 text-sm leading-6 text-white/85">使用默认渐变背景</p>
-                    )}
-                  </div>
-                  <div className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-xs uppercase tracking-[0.25em] text-white/60">联系</p>
-                    <p className="mt-2 text-sm leading-6 text-white/85">{product.contactHint}</p>
+                <div className="rounded-[1.6rem] border border-white/10 bg-white/10 p-4 backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.25em] text-white/60">购买提醒</p>
+                  <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <p className="max-w-2xl text-sm leading-7 text-white/84">
+                      联系客服购买时，直接发送商品名称、截图或链接会更快。当前默认渠道为 {product.contactName}。
+                    </p>
+                    <div className="rounded-full border border-white/12 bg-white/10 px-4 py-2 text-sm font-medium text-white">
+                      {product.contactValue}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -159,7 +146,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             <aside className="space-y-5 bg-[rgba(255,249,241,0.96)] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
               <div className="rounded-[1.6rem] border border-[var(--line)] bg-white p-5">
-                <p className="text-sm uppercase tracking-[0.28em] text-[var(--accent)]">Price</p>
+                <p className="text-sm uppercase tracking-[0.28em] text-[var(--accent)]">价格</p>
                 <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-4xl font-semibold text-[var(--ink)]">{formatCurrency(product.price)}</p>
@@ -176,28 +163,33 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </div>
               </div>
 
-              <div className="rounded-[1.6rem] border border-[rgba(169,79,29,0.18)] bg-[rgba(169,79,29,0.06)] p-5">
-                <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">Contact</p>
+              <div className="rounded-[1.6rem] border border-[rgba(169,79,29,0.2)] bg-[rgba(169,79,29,0.08)] p-5">
+                <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">联系购买</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{product.contactHint}</p>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-4 rounded-[1.4rem] border border-white/60 bg-white/80 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">默认客服</p>
+                  <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{product.contactName}</p>
+                  <p className="mt-1 break-all text-sm leading-6 text-[var(--muted)]">{product.contactValue}</p>
+                </div>
+                <div className="mt-4 grid gap-3">
                   <a
                     href={product.contactHref}
                     className="rounded-full bg-[var(--accent)] px-4 py-3 text-center text-sm font-medium text-white transition hover:bg-[#8f4318]"
                   >
-                    立即咨询
+                    联系购买
                   </a>
                   <Link
                     href="/contact"
                     className="rounded-full border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
-                    查看联系方式
+                    查看全部联系方式
                   </Link>
                 </div>
               </div>
 
               {product.galleryUrls.length > 0 ? (
                 <div className="rounded-[1.6rem] border border-[var(--line)] bg-white p-5">
-                  <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">Gallery</p>
+                  <p className="text-sm uppercase tracking-[0.25em] text-[var(--accent)]">图集</p>
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     {product.galleryUrls.map((imageUrl) => (
                       <div key={imageUrl} className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[rgba(255,249,241,0.96)]">
@@ -219,8 +211,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
         <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <article className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,249,241,0.92)] p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Detail</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">详情信息区</h2>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">商品详情</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">商品说明</h2>
             <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--muted)]">
               <p className="whitespace-pre-line break-words text-[15px] leading-8">{product.summary}</p>
 
@@ -233,7 +225,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           <aside className="space-y-5">
             <section className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,248,239,0.96)] p-5 shadow-[0_18px_60px_rgba(16,16,16,0.06)] sm:p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">Related</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)]">相关推荐</p>
               <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">相关推荐</h2>
               <div className="mt-5 grid gap-3">
                 {relatedProducts.length > 0 ? (
@@ -241,7 +233,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     <Link
                       key={item.id}
                       href={`/products/${item.id}`}
-                      className="rounded-3xl border border-[var(--line)] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
+                      className="rounded-3xl border border-[var(--line)] bg-white p-4 transition-colors hover:border-[var(--accent)]"
                     >
                       <p className="text-xs uppercase tracking-[0.25em] text-[var(--accent)]">{item.sku}</p>
                       <p className="mt-2 text-sm font-medium text-[var(--ink)]">{item.name}</p>

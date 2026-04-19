@@ -201,7 +201,7 @@ export function HomeCatalogClient({ snapshot }: HomeCatalogClientProps) {
       </div>
 
       {visibleProducts.length > 0 ? (
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {visibleProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -277,10 +277,17 @@ function CatalogPageButton({
 
 function ProductCard({ product }: { product: ShowcaseProductCard }) {
   const hasOriginalPrice = product.originalPrice !== null && product.originalPrice > product.price;
+  const detailHref = `/products/${product.id}`;
 
   return (
-    <article className="group overflow-hidden rounded-[1.75rem] border border-[var(--line)] bg-white shadow-[0_12px_40px_rgba(16,16,16,0.06)] transition hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(16,16,16,0.1)]">
-      <div className="relative min-h-44 overflow-hidden border-b border-[var(--line)] px-5 py-5 text-white" style={{ backgroundImage: product.coverTone }}>
+    <article className="group relative overflow-hidden rounded-[1.55rem] border border-[var(--line)] bg-white shadow-[0_12px_40px_rgba(16,16,16,0.06)] transition-colors duration-200 hover:border-[rgba(169,79,29,0.3)] focus-within:border-[rgba(169,79,29,0.45)]">
+      <Link
+        href={detailHref}
+        aria-label={`查看 ${product.name} 详情`}
+        className="absolute inset-0 z-10 rounded-[1.55rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+      />
+
+      <div className="relative min-h-40 overflow-hidden border-b border-[var(--line)] px-4 py-4 text-white sm:min-h-44" style={{ backgroundImage: product.coverTone }}>
         {product.coverImage ? (
           <img
             src={product.coverImage}
@@ -291,28 +298,30 @@ function ProductCard({ product }: { product: ShowcaseProductCard }) {
           />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/24 to-black/10" />
-        <div className="relative flex items-start justify-between gap-4">
-          <div className="space-y-1">
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="space-y-1.5">
             <p className="text-xs uppercase tracking-[0.3em] text-[rgba(244,205,189,0.92)]">{product.sku}</p>
-            <h3 className="text-xl font-semibold text-white">{product.name}</h3>
-            <p className="text-sm text-white/76">{product.categoryName}</p>
+            <h3 className="text-lg font-semibold leading-6 text-white sm:text-xl">{product.name}</h3>
+            <p className="text-xs tracking-[0.18em] text-white/72">{product.categoryName}</p>
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-lg font-semibold text-white backdrop-blur">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-sm font-semibold text-white backdrop-blur sm:h-12 sm:w-12">
             {product.badge}
           </div>
         </div>
       </div>
 
-      <div className="space-y-4 p-5">
-        <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#fbf7ee] p-4">
-          <div className="rounded-2xl bg-white px-4 py-3">
+      <div className="space-y-3 p-4">
+        <div className="grid grid-cols-[1.2fr_0.8fr] gap-2 rounded-[1.4rem] bg-[#fbf7ee] p-3">
+          <div className="rounded-2xl bg-white px-3 py-3">
             <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">价格</p>
-            <p className="mt-2 text-lg font-semibold text-[var(--accent)]">{formatCurrency(product.price)}</p>
+            <p className="mt-1.5 text-base font-semibold text-[var(--accent)] sm:text-lg">{formatCurrency(product.price)}</p>
             {hasOriginalPrice ? (
-              <p className="mt-1 text-sm text-[var(--muted)]">
+              <p className="mt-1 text-xs text-[var(--muted)] sm:text-sm">
                 原价 <span className="line-through">{formatCurrency(product.originalPrice ?? 0)}</span>
               </p>
-            ) : null}
+            ) : (
+              <p className="mt-1 text-xs text-[var(--muted)] sm:text-sm">整卡点击可查看详情</p>
+            )}
           </div>
           <InfoPill
             label="库存"
@@ -321,18 +330,17 @@ function ProductCard({ product }: { product: ShowcaseProductCard }) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          <Link
-            href={`/products/${product.id}`}
-            className="rounded-full border border-[var(--line)] px-4 py-2 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          >
-            详情
-          </Link>
+        <div className="flex items-center justify-between gap-3 rounded-full border border-[var(--line)] bg-[#fffdf9] px-3 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--muted)]">
+          <span>点击卡片查看详情</span>
+          <span className="rounded-full bg-[rgba(169,79,29,0.08)] px-2.5 py-1 text-[var(--accent)]">直达详情</span>
+        </div>
+
+        <div className="grid gap-2">
           <a
             href={product.contactHref}
-            className="rounded-full bg-[var(--accent)] px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-[#8f4318]"
+            className="relative z-20 rounded-full bg-[var(--accent)] px-4 py-3 text-center text-sm font-medium text-white transition hover:bg-[#8f4318]"
           >
-            咨询
+            联系购买
           </a>
         </div>
       </div>
@@ -350,9 +358,9 @@ function InfoPill({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white px-4 py-3">
+    <div className="rounded-2xl bg-white px-3 py-3">
       <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{label}</p>
-      <p className={`mt-2 text-lg font-semibold ${accent}`}>{value}</p>
+      <p className={`mt-1.5 text-base font-semibold sm:text-lg ${accent}`}>{value}</p>
     </div>
   );
 }

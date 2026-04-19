@@ -101,6 +101,8 @@ export type PublicCatalogSnapshot = {
   source: "api" | "fallback";
 };
 
+type PurchaseContactChannel = "wechat" | "qq";
+
 const COVER_TONES = [
   "linear-gradient(135deg, #1d1511, #16211d, #22382f)",
   "linear-gradient(135deg, #a94f1d, #8c3f22, #1f1f1f)",
@@ -114,8 +116,9 @@ const CATEGORY_TONES = new Map<string, string>([
   ["资料内容", COVER_TONES[2]],
   ["网站模板", COVER_TONES[3]]
 ]);
+const PURCHASE_CONTACT_CHANNELS: PurchaseContactChannel[] = ["wechat", "qq"];
 const PUBLIC_DATA_REVALIDATE_SECONDS = 60;
-const PUBLIC_CONTACT_HINT = "在线咨询";
+const PUBLIC_CONTACT_HINT = "扫码联系客服购买";
 
 function buildQueryString(params?: Record<string, string | undefined>) {
   if (!params) {
@@ -197,6 +200,10 @@ function parseDisplayPlaces(value: string | null | undefined) {
     .filter(Boolean);
 }
 
+function normalizeContactType(value: string | null | undefined) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
 function isUrl(value: string) {
   return /^(https?:\/\/|mailto:|tel:)/i.test(value);
 }
@@ -218,12 +225,13 @@ function buildContactHref(record: PublicContactRecord) {
     return jumpUrl;
   }
 
+  const type = normalizeContactType(record.type);
   const value = record.value?.trim() ?? "";
   if (!value) {
     return `#contact-${record.id}`;
   }
 
-  switch (record.type) {
+  switch (type) {
     case "email":
       return isUrl(value) ? value : `mailto:${value}`;
     case "phone":
@@ -245,7 +253,7 @@ function normalizeContact(record: PublicContactRecord): ShowcaseContactCard {
     value: record.value,
     hint: PUBLIC_CONTACT_HINT,
     href: buildContactHref(record),
-    type: record.type || "contact",
+    type: normalizeContactType(record.type) || "contact",
     qrImage: record.qrImage,
     displayPlaces: parseDisplayPlaces(record.displayPlaces)
   };
@@ -270,6 +278,45 @@ function resolveContact(cards: ShowcaseContactCard[], contactId: number | null, 
   }
 
   return undefined;
+}
+
+function inferPurchaseContactChannel(contact: ShowcaseContactCard): PurchaseContactChannel | null {
+  const normalizedType = normalizeContactType(contact.type);
+  if (normalizedType === "wechat" || normalizedType === "qq") {
+    return normalizedType;
+  }
+
+  const haystack = `${contact.label} ${contact.value}`.toLowerCase();
+  if (contact.qrImage) {
+    if (haystack.includes("微信") || haystack.includes("wechat")) {
+      return "wechat";
+    }
+    if (haystack.includes("qq")) {
+      return "qq";
+    }
+  }
+
+  return null;
+}
+
+function buildProductContactHref(contact: ShowcaseContactCard | undefined) {
+  if (!contact) {
+    return "/contact";
+  }
+
+  return contact.href.startsWith("#contact-") ? `/contact${contact.href}` : contact.href;
+}
+
+export function selectPrimaryPurchaseContacts(contacts: ShowcaseContactCard[]) {
+  return PURCHASE_CONTACT_CHANNELS.flatMap((channel) => {
+    const matches = contacts.filter((contact) => inferPurchaseContactChannel(contact) === channel);
+    if (matches.length === 0) {
+      return [];
+    }
+
+    const preferred = matches.find((contact) => Boolean(contact.qrImage)) ?? matches[0];
+    return [preferred];
+  });
 }
 
 function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseContactCard[], contactPlace = "product"): ShowcaseProductCard {
@@ -298,7 +345,7 @@ function normalizeProductCard(record: PublicProductRecord, contacts: ShowcaseCon
       toFlag(record.isRecommended) ? "推荐位" : "常规位",
       stock > 0 ? `${stock} 件库存` : "售罄"
     ],
-    contactHref: contact?.href ?? "/contact",
+    contactHref: buildProductContactHref(contact),
     badge: createBadge(record.name),
     coverTone: CATEGORY_TONES.get(categoryName) || pickTone(record.id.toString()),
     coverImage: record.coverImage
