@@ -148,11 +148,25 @@ public class UploadService {
             throw new IllegalArgumentException("文件路径不能为空");
         }
 
-        Path resolvedPath = uploadBasePath.resolve(relativePath).normalize();
+        String normalizedRelativePath = normalizeRelativePath(relativePath);
+        Path resolvedPath = uploadBasePath.resolve(normalizedRelativePath).normalize();
         if (!resolvedPath.startsWith(uploadBasePath)) {
             throw new IllegalArgumentException("非法文件路径");
         }
         return resolvedPath;
+    }
+
+    private String normalizeRelativePath(String relativePath) {
+        String normalized = relativePath.trim().replace('\\', '/');
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        if (normalized.isBlank()) {
+            throw new IllegalArgumentException("文件路径不能为空");
+        }
+
+        return normalized;
     }
 
     private String normalizePrefix(String prefix) {
