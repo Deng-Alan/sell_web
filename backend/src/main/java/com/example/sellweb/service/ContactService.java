@@ -30,11 +30,18 @@ public class ContactService {
             "link",
             "other"
     );
+    private static final String PRODUCTS_TAG = "public:products";
+    private static final String CONTACTS_TAG = "public:contacts";
+    private static final String HOME_TAG = "public:home";
 
     private final ContactRepository contactRepository;
+    private final FrontendRevalidationService frontendRevalidationService;
 
-    public ContactService(ContactRepository contactRepository) {
+    public ContactService(
+            ContactRepository contactRepository,
+            FrontendRevalidationService frontendRevalidationService) {
         this.contactRepository = contactRepository;
+        this.frontendRevalidationService = frontendRevalidationService;
     }
 
     /**
@@ -77,6 +84,7 @@ public class ContactService {
         applyRequest(contact, request, true);
 
         Contact saved = contactRepository.save(contact);
+        scheduleContactRevalidation();
         return toResponse(saved);
     }
 
@@ -90,6 +98,7 @@ public class ContactService {
         applyRequest(contact, request, false);
 
         Contact saved = contactRepository.save(contact);
+        scheduleContactRevalidation();
         return toResponse(saved);
     }
 
@@ -100,6 +109,7 @@ public class ContactService {
         Contact contact = findContactOrThrow(id);
         contactRepository.delete(contact);
         contactRepository.flush();
+        scheduleContactRevalidation();
     }
 
     /**
@@ -112,6 +122,7 @@ public class ContactService {
         contact.setStatus(status);
 
         Contact saved = contactRepository.save(contact);
+        scheduleContactRevalidation();
         return toResponse(saved);
     }
 
@@ -127,7 +138,15 @@ public class ContactService {
         contact.setSortOrder(sortOrder);
 
         Contact saved = contactRepository.save(contact);
+        scheduleContactRevalidation();
         return toResponse(saved);
+    }
+
+    private void scheduleContactRevalidation() {
+        frontendRevalidationService.scheduleRevalidation(
+                List.of(PRODUCTS_TAG, CONTACTS_TAG, HOME_TAG),
+                List.of("/", "/contact")
+        );
     }
 
     private void applyRequest(Contact contact, ContactRequest request, boolean isCreate) {

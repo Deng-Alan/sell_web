@@ -24,9 +24,13 @@ import java.util.stream.Collectors;
 public class SiteSettingService {
 
     private final SiteSettingRepository siteSettingRepository;
+    private final FrontendRevalidationService frontendRevalidationService;
 
-    public SiteSettingService(SiteSettingRepository siteSettingRepository) {
+    public SiteSettingService(
+            SiteSettingRepository siteSettingRepository,
+            FrontendRevalidationService frontendRevalidationService) {
         this.siteSettingRepository = siteSettingRepository;
+        this.frontendRevalidationService = frontendRevalidationService;
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +63,9 @@ public class SiteSettingService {
         setting.setSettingValue(request.getSettingValue());
         setting.setGroupName(resolveGroupName(request.getGroupName()));
 
-        return toResponse(siteSettingRepository.save(setting));
+        SiteSettingResponse response = toResponse(siteSettingRepository.save(setting));
+        scheduleSettingRevalidation(setting.getGroupName());
+        return response;
     }
 
     public List<SiteSettingResponse> saveGroupSettings(String groupName, SiteSettingGroupSaveRequest request) {
@@ -84,6 +90,7 @@ public class SiteSettingService {
         }
 
         responses.sort(Comparator.comparing(SiteSettingResponse::getSettingKey, Comparator.nullsFirst(String::compareTo)));
+        scheduleSettingRevalidation(groupName);
         return responses;
     }
 
@@ -106,6 +113,15 @@ public class SiteSettingService {
 
     private String resolveGroupName(String groupName) {
         return StringUtils.hasText(groupName) ? groupName.trim() : null;
+    }
+
+    private void scheduleSettingRevalidation(String groupName) {
+        List<String> tags = new ArrayList<>(List.of("public:site"));
+        if (Objects.equals(resolveGroupName(groupName), "home")) {
+            tags.add("public:home");
+        }
+
+        frontendRevalidationService.scheduleRevalidation(tags, List.of("/"));
     }
 
     private Comparator<SiteSetting> settingComparator() {

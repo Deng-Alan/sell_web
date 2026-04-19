@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { PUBLIC_CACHE_TAGS, normalizeCacheKeys } from "@/lib/public-cache";
 import type { ApiResponse } from "@/types/api";
 import type {
   HomeChannel,
@@ -273,8 +274,25 @@ function resolveHomeContent(config: HomeConfigData | null, contacts: HomeContact
   };
 }
 
+function resolveHomeCacheTags(path: string) {
+  if (path.startsWith("/public/home-config")) {
+    return [PUBLIC_CACHE_TAGS.home, PUBLIC_CACHE_TAGS.site, PUBLIC_CACHE_TAGS.contacts];
+  }
+
+  if (path.startsWith("/public/contacts")) {
+    return [PUBLIC_CACHE_TAGS.contacts];
+  }
+
+  return [];
+}
+
 async function readPublicResponse<T>(path: string) {
-  const response = await apiFetch<ApiResponse<T>>(path);
+  const response = await apiFetch<ApiResponse<T>>(path, {
+    next: {
+      revalidate: 60,
+      tags: normalizeCacheKeys(resolveHomeCacheTags(path))
+    }
+  });
   if (!response.success) {
     throw new Error(response.message || `API request failed: ${path}`);
   }

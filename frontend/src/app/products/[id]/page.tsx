@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { formatCurrency, loadPublicProductPage, type ShowcaseProductDetail } from "@/lib/public-catalog";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -98,6 +98,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   src={product.coverImage}
                   alt={product.name}
                   className="absolute inset-0 h-full w-full object-cover"
+                  loading="eager"
+                  decoding="async"
                 />
               ) : null}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(169,79,29,0.26),transparent_30%)]" />
@@ -127,7 +129,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     <p className="text-xs uppercase tracking-[0.25em] text-white/60">封面图片</p>
                     {product.coverImage ? (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-white/10">
-                        <img src={product.coverImage} alt={product.name} className="h-40 w-full object-cover" />
+                        <img
+                          src={product.coverImage}
+                          alt={product.name}
+                          className="h-40 w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                     ) : (
                       <p className="mt-2 text-sm leading-6 text-white/85">使用默认渐变背景</p>
@@ -185,7 +193,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     {product.galleryUrls.map((imageUrl) => (
                       <div key={imageUrl} className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[rgba(255,249,241,0.96)]">
-                        <img src={imageUrl} alt={product.name} className="h-28 w-full object-cover" />
+                        <img
+                          src={imageUrl}
+                          alt={product.name}
+                          className="h-28 w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                     ))}
                   </div>

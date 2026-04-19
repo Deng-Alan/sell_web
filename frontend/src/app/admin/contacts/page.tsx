@@ -612,7 +612,7 @@ export default function AdminContactsPage() {
                 </AdminField>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <AdminField label="二维码图片" hint="可直接填写地址，或上传图片">
+                  <AdminField label="二维码图片" hint="可直接填写地址，或上传图片；生产环境优先使用站内上传地址">
                     <div className="space-y-2">
                       <input
                         value={formState.qrImage}
@@ -716,6 +716,7 @@ export default function AdminContactsPage() {
                   </div>
                   <div className="rounded-3xl border border-slate-200 bg-white p-4">
                     <p className="text-sm text-slate-500">二维码预览</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">优先上传到本站，避免使用外链二维码图片导致访问波动。</p>
                     <div className="mt-3 overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
                       {formState.qrImage ? (
                         <img src={formState.qrImage} alt={selectedPreview.name} className="h-40 w-full object-cover" />

@@ -29,5 +29,8 @@ app:
   upload:
     base-dir: ${UPLOAD_BASE_DIR:uploads}
     public-prefix: ${UPLOAD_PUBLIC_PREFIX:/api/admin/uploads/files}
+  frontend:
+    revalidate-url: ${FRONTEND_REVALIDATE_URL:}
+    revalidate-secret: ${REVALIDATE_SECRET:}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:3002,http://127.0.0.1:3002,http://localhost:3005,http://127.0.0.1:3005}

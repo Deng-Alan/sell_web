@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { loadPublicCatalog } from "@/lib/public-catalog";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "联系我们 | 商品展示",
@@ -47,7 +47,13 @@ export default async function ContactPage() {
                   <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{contact.hint}</p>
                   {contact.qrImage ? (
                     <div className="mt-4 overflow-hidden rounded-[1.4rem] border border-[var(--line)] bg-[rgba(255,249,241,0.92)]">
-                      <img src={contact.qrImage} alt={contact.label} className="h-40 w-full object-cover" />
+                      <img
+                        src={contact.qrImage}
+                        alt={contact.label}
+                        className="h-40 w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
                     </div>
                   ) : null}
                   <span className="mt-5 inline-flex rounded-full border border-[var(--line)] px-3 py-1 text-xs font-medium text-[var(--ink)] transition group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">

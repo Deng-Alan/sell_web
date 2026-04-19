@@ -51,11 +51,13 @@ POSTGRES_DB=sell_web
 POSTGRES_USER=sellweb
 POSTGRES_PASSWORD=sw_pg_5mYh7Pq9Lx2Nf8Kc4Vt1Ra6Z
 JWT_SECRET=sw_jwt_A7r2Kq9Lm4Nx8Vc1Tp6Yz3Hd5Bw0Ef7Ru2Sa9Jk6Px1Qm4Cn
+REVALIDATE_SECRET=sw_revalidate_H8m2Lp4Qx9Nc7Vt1Zd6Kr3Js5Bw0Ef7Ru2Sa9Yp1Cn
 JPA_DDL_AUTO=validate
 FLYWAY_ENABLED=true
 APP_CORS_ALLOWED_ORIGINS=https://emailcc.cn
 NEXT_PUBLIC_API_BASE_URL=https://emailcc.cn/api
 INTERNAL_API_BASE_URL=http://backend:8080/api
+FRONTEND_REVALIDATE_URL=http://frontend:3000/api/internal/revalidate
 ```
 
 说明：
@@ -63,6 +65,8 @@ INTERNAL_API_BASE_URL=http://backend:8080/api
 - `APP_PATH` 必须是服务器上的项目绝对路径；如果你用宝塔编排页面，这是关键项
 - `NEXT_PUBLIC_API_BASE_URL` 给浏览器使用，必须是公网可访问地址
 - `INTERNAL_API_BASE_URL` 给 Next.js 服务端渲染使用，必须是容器内地址
+- `REVALIDATE_SECRET` 用于后端通知前端立即刷新公开页缓存，前后端必须一致
+- `FRONTEND_REVALIDATE_URL` 让后端在内容变更后回调前端的内部刷新接口
 - `JPA_DDL_AUTO=validate`，避免生产环境自动改表
 - `FLYWAY_ENABLED=true`，通过迁移脚本管理数据库结构
 
@@ -135,6 +139,8 @@ Compose 已包含两个持久化卷：
 - `upload_data`：后台上传文件
 
 这两个卷都必须保留；尤其是 `upload_data`，否则后台上传的商品图片和站点图片会在重建容器后丢失。
+
+上传图片接口现在会返回长期缓存头，所以商品图和二维码图应优先使用后台上传地址，不要继续依赖境外外链图床。
 
 ## 7. 首次验收
 

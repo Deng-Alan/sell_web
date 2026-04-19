@@ -21,9 +21,13 @@ import java.util.stream.Collectors;
 public class HomeSectionService {
 
     private final HomeSectionRepository homeSectionRepository;
+    private final FrontendRevalidationService frontendRevalidationService;
 
-    public HomeSectionService(HomeSectionRepository homeSectionRepository) {
+    public HomeSectionService(
+            HomeSectionRepository homeSectionRepository,
+            FrontendRevalidationService frontendRevalidationService) {
         this.homeSectionRepository = homeSectionRepository;
+        this.frontendRevalidationService = frontendRevalidationService;
     }
 
     @Transactional(readOnly = true)
@@ -84,13 +88,16 @@ public class HomeSectionService {
             section.setStatus(request.getStatus());
         }
 
-        return toResponse(homeSectionRepository.save(section));
+        HomeSectionResponse response = toResponse(homeSectionRepository.save(section));
+        scheduleHomeRevalidation();
+        return response;
     }
 
     public void deleteSection(String sectionKey) {
         HomeSection section = findSectionOrThrow(sectionKey);
         homeSectionRepository.delete(section);
         homeSectionRepository.flush();
+        scheduleHomeRevalidation();
     }
 
     private HomeSection findSectionOrThrow(String sectionKey) {
@@ -103,6 +110,13 @@ public class HomeSectionService {
         if (!StringUtils.hasText(sectionKey)) {
             throw new IllegalArgumentException("sectionKey不能为空");
         }
+    }
+
+    private void scheduleHomeRevalidation() {
+        frontendRevalidationService.scheduleRevalidation(
+                List.of("public:home", "public:site"),
+                List.of("/")
+        );
     }
 
     private Comparator<HomeSection> sectionComparator() {

@@ -352,7 +352,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
             <AdminPanel title="媒体与详情" description="上传或填写封面、图集和详情正文。">
               <div className="grid gap-4 lg:grid-cols-[1fr_0.72fr]">
                 <div className="space-y-4">
-                  <AdminField label="封面图 URL" hint="前台卡片和详情页首图使用此图片。">
+                  <AdminField label="封面图 URL" hint="前台卡片和详情页首图使用此图片，生产环境优先使用站内上传地址。">
                     <div className="space-y-3">
                       <input
                         className="admin-input"
@@ -388,7 +388,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                       />
                     </div>
                   </AdminField>
-                  <AdminField label="图集" hint="每行一张图片，保存时会转为图片数组。">
+                  <AdminField label="图集" hint="每行一张图片，保存时会转为图片数组，尽量避免外链图床。">
                     <div className="space-y-3">
                       <textarea
                         className="admin-textarea"
@@ -534,6 +534,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                 <li>分类、商品名称、售价和库存必须填写。</li>
                 <li>联系人可以为空；为空时详情页不绑定独立咨询渠道。</li>
                 <li>图集按换行分割，建议每行只放一个图片地址。</li>
+                <li>商品图片建议通过后台上传后再引用，外链图片容易导致前台加载变慢。</li>
               </ul>
               <div className="mt-4 flex flex-wrap gap-3">
                 <button

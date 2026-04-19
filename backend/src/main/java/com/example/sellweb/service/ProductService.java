@@ -33,21 +33,27 @@ public class ProductService {
     private static final int DEFAULT_PAGE = 1;
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int MAX_PAGE_SIZE = 100;
+    private static final String PRODUCTS_TAG = "public:products";
+    private static final String CATEGORIES_TAG = "public:categories";
+    private static final String CONTACTS_TAG = "public:contacts";
 
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductImageRepository productImageRepository;
     private final ContactRepository contactRepository;
+    private final FrontendRevalidationService frontendRevalidationService;
 
     public ProductService(
             ProductRepository productRepository,
             ProductCategoryRepository productCategoryRepository,
             ProductImageRepository productImageRepository,
-            ContactRepository contactRepository) {
+            ContactRepository contactRepository,
+            FrontendRevalidationService frontendRevalidationService) {
         this.productRepository = productRepository;
         this.productCategoryRepository = productCategoryRepository;
         this.productImageRepository = productImageRepository;
         this.contactRepository = contactRepository;
+        this.frontendRevalidationService = frontendRevalidationService;
     }
 
     @Transactional(readOnly = true)
@@ -114,6 +120,7 @@ public class ProductService {
 
         Product saved = productRepository.save(product);
         replaceImages(saved.getId(), request.getImageUrls());
+        scheduleProductRevalidation(saved.getId());
         return toResponse(saved, true);
     }
 
@@ -130,6 +137,7 @@ public class ProductService {
         if (request.getImageUrls() != null) {
             replaceImages(saved.getId(), request.getImageUrls());
         }
+        scheduleProductRevalidation(saved.getId());
         return toResponse(saved, true);
     }
 
@@ -138,6 +146,7 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
         productImageRepository.deleteByProductId(product.getId());
         productRepository.delete(product);
+        scheduleProductRevalidation(id);
     }
 
     public ProductResponse updateStatus(Long id, Short status) {
@@ -147,6 +156,7 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
         product.setStatus(status);
         Product saved = productRepository.save(product);
+        scheduleProductRevalidation(saved.getId());
         return toResponse(saved, true);
     }
 
@@ -157,6 +167,7 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
         product.setIsRecommended(isRecommended);
         Product saved = productRepository.save(product);
+        scheduleProductRevalidation(saved.getId());
         return toResponse(saved, true);
     }
 
@@ -169,7 +180,15 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
         product.setSortOrder(sortOrder);
         Product saved = productRepository.save(product);
+        scheduleProductRevalidation(saved.getId());
         return toResponse(saved, true);
+    }
+
+    private void scheduleProductRevalidation(Long productId) {
+        frontendRevalidationService.scheduleRevalidation(
+                List.of(PRODUCTS_TAG, CATEGORIES_TAG, CONTACTS_TAG, "public:product:" + productId),
+                List.of("/", "/products/" + productId)
+        );
     }
 
     private void applyRequest(Product product, ProductRequest request, ProductCategory category, Contact contact, boolean isCreate) {

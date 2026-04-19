@@ -10,6 +10,12 @@ import type {
 } from "@/types/catalog";
 
 const adminTokenStorageKeys = ["sell_web_admin_token", "sell-web-admin-token", "admin_token"] as const;
+type CachedRequestInit = RequestInit & {
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+};
 
 function toQueryString(params?: Record<string, string | number | boolean | undefined>) {
   if (!params) {
@@ -66,14 +72,16 @@ function buildHeaders(init?: RequestInit) {
   return headers;
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, init?: CachedRequestInit): Promise<T> {
   let response: Response;
+  const cacheMode = init?.cache ?? (init?.next ? undefined : "no-store");
 
   try {
     response = await fetch(joinApiPath(path), {
       ...init,
       headers: buildHeaders(init),
-      cache: "no-store"
+      cache: cacheMode,
+      next: init?.next
     });
   } catch {
     throw new Error("无法连接后端服务，请确认 Spring Boot 服务已启动。");

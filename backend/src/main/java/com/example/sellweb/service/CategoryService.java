@@ -19,10 +19,18 @@ import java.util.stream.Collectors;
 @Transactional
 public class CategoryService {
 
-    private final ProductCategoryRepository categoryRepository;
+    private static final String PRODUCTS_TAG = "public:products";
+    private static final String CATEGORIES_TAG = "public:categories";
+    private static final String HOME_TAG = "public:home";
 
-    public CategoryService(ProductCategoryRepository categoryRepository) {
+    private final ProductCategoryRepository categoryRepository;
+    private final FrontendRevalidationService frontendRevalidationService;
+
+    public CategoryService(
+            ProductCategoryRepository categoryRepository,
+            FrontendRevalidationService frontendRevalidationService) {
         this.categoryRepository = categoryRepository;
+        this.frontendRevalidationService = frontendRevalidationService;
     }
 
     /**
@@ -71,6 +79,7 @@ public class CategoryService {
         category.setStatus(request.getStatus() != null ? request.getStatus() : 1);
 
         ProductCategory saved = categoryRepository.save(category);
+        scheduleCategoryRevalidation();
         return toResponse(saved);
     }
 
@@ -94,6 +103,7 @@ public class CategoryService {
         }
 
         ProductCategory saved = categoryRepository.save(category);
+        scheduleCategoryRevalidation();
         return toResponse(saved);
     }
 
@@ -106,6 +116,7 @@ public class CategoryService {
         try {
             categoryRepository.delete(category);
             categoryRepository.flush();
+            scheduleCategoryRevalidation();
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalStateException("分类下存在商品，无法删除");
         }
@@ -123,6 +134,7 @@ public class CategoryService {
 
         category.setStatus(status);
         ProductCategory saved = categoryRepository.save(category);
+        scheduleCategoryRevalidation();
         return toResponse(saved);
     }
 
@@ -138,7 +150,15 @@ public class CategoryService {
 
         category.setSortOrder(sortOrder);
         ProductCategory saved = categoryRepository.save(category);
+        scheduleCategoryRevalidation();
         return toResponse(saved);
+    }
+
+    private void scheduleCategoryRevalidation() {
+        frontendRevalidationService.scheduleRevalidation(
+                List.of(PRODUCTS_TAG, CATEGORIES_TAG, HOME_TAG),
+                List.of("/")
+        );
     }
 
     /**

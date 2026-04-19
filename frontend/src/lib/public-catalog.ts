@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { PUBLIC_CACHE_TAGS, normalizeCacheKeys } from "@/lib/public-cache";
 import type { ApiListResponse, ApiResponse } from "@/types/api";
 import type { PublicCategoryRecord, PublicContactRecord, PublicProductRecord } from "@/types/catalog";
 
@@ -106,6 +107,7 @@ const CATEGORY_TONES = new Map<string, string>([
   ["资料内容", COVER_TONES[2]],
   ["网站模板", COVER_TONES[3]]
 ]);
+const PUBLIC_DATA_REVALIDATE_SECONDS = 60;
 
 function buildQueryString(params?: Record<string, string | undefined>) {
   if (!params) {
@@ -351,7 +353,12 @@ function applyCatalogFilters(products: ShowcaseProductCard[], query: PublicCatal
 
 async function fetchPublicArray<T>(path: string) {
   try {
-    const response = await apiFetch<ApiResponse<T[]>>(path);
+    const response = await apiFetch<ApiResponse<T[]>>(path, {
+      next: {
+        revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
+        tags: resolvePublicCacheTags(path)
+      }
+    });
     return response.data;
   } catch {
     return null;
@@ -360,7 +367,12 @@ async function fetchPublicArray<T>(path: string) {
 
 async function fetchPublicCollection<T>(path: string): Promise<PublicCollectionResult<T> | null> {
   try {
-    const response = await apiFetch<ApiResponse<T[] | ApiListResponse<T>>>(path);
+    const response = await apiFetch<ApiResponse<T[] | ApiListResponse<T>>>(path, {
+      next: {
+        revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
+        tags: resolvePublicCacheTags(path)
+      }
+    });
     const data = response.data;
     if (!data) {
       return null;
@@ -386,11 +398,46 @@ async function fetchPublicCollection<T>(path: string): Promise<PublicCollectionR
 
 async function fetchPublicItem<T>(path: string) {
   try {
-    const response = await apiFetch<ApiResponse<T>>(path);
+    const response = await apiFetch<ApiResponse<T>>(path, {
+      next: {
+        revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
+        tags: resolvePublicCacheTags(path)
+      }
+    });
     return response.data;
   } catch {
     return null;
   }
+}
+
+function resolvePublicCacheTags(path: string) {
+  if (path.startsWith("/public/products/")) {
+    const productId = path.split("/").pop();
+    return normalizeCacheKeys([
+      PUBLIC_CACHE_TAGS.products,
+      PUBLIC_CACHE_TAGS.categories,
+      PUBLIC_CACHE_TAGS.contacts,
+      productId ? `public:product:${productId}` : null
+    ]);
+  }
+
+  if (path.startsWith("/public/products")) {
+    return [PUBLIC_CACHE_TAGS.products, PUBLIC_CACHE_TAGS.categories, PUBLIC_CACHE_TAGS.contacts];
+  }
+
+  if (path.startsWith("/public/categories")) {
+    return [PUBLIC_CACHE_TAGS.categories];
+  }
+
+  if (path.startsWith("/public/contacts")) {
+    return [PUBLIC_CACHE_TAGS.contacts];
+  }
+
+  if (path.startsWith("/public/home-config")) {
+    return [PUBLIC_CACHE_TAGS.home, PUBLIC_CACHE_TAGS.site, PUBLIC_CACHE_TAGS.contacts];
+  }
+
+  return [];
 }
 
 function buildRelatedProducts(products: ShowcaseProductCard[], currentProduct: ShowcaseProductCard) {

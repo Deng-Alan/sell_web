@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { formatCurrency, loadPublicCatalog, type PublicCatalogQuery, type ShowcaseCategoryOption, type ShowcaseProductCard } from "@/lib/public-catalog";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "商品展示 | 精选商品目录",
@@ -219,6 +219,8 @@ function ProductCard({ product }: { product: ShowcaseProductCard }) {
             src={product.coverImage}
             alt={product.name}
             className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/24 to-black/10" />
