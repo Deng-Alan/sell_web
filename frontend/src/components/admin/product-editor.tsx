@@ -28,6 +28,7 @@ import type { AdminFlagValue } from "@/types/catalog";
 type AdminProductEditorProps = {
   mode: "create" | "edit";
   productId?: string;
+  copyFromProductId?: string;
 };
 
 function toStatusLabel(status: AdminFlagValue | null | undefined) {
@@ -53,7 +54,7 @@ function toNoticeTone(message: string | null, source?: AdminProductEditorViewMod
   return source === "fallback" ? "error" : message.includes("失败") ? "error" : "success";
 }
 
-export function AdminProductEditor({ mode, productId }: AdminProductEditorProps) {
+export function AdminProductEditor({ mode, productId, copyFromProductId }: AdminProductEditorProps) {
   const router = useRouter();
   const [viewModel, setViewModel] = useState<AdminProductEditorViewModel | null>(null);
   const [form, setForm] = useState<AdminProductFormState>(createEmptyProductFormState());
@@ -69,16 +70,38 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
 
     async function run() {
       setLoading(true);
-      const nextViewModel = await loadAdminProductEditor(productId);
+      const nextViewModel = await loadAdminProductEditor(productId, mode === "create" ? copyFromProductId : undefined);
 
       if (cancelled) {
         return;
       }
 
+      const copiedFormState =
+        mode === "create" && nextViewModel.copySourceProduct
+          ? createProductFormState(nextViewModel.copySourceProduct)
+          : createProductFormState(nextViewModel.product);
+
       setViewModel(nextViewModel);
-      setForm(createProductFormState(nextViewModel.product));
+      setForm(copiedFormState);
       setLoading(false);
-      setMessage(nextViewModel.source === "fallback" ? nextViewModel.error ?? "商品数据加载失败，请检查后端服务。" : null);
+      if (nextViewModel.source === "fallback") {
+        setMessage(nextViewModel.error ?? "商品数据加载失败，请检查后端服务。");
+        return;
+      }
+
+      if (mode === "create" && copyFromProductId) {
+        if (nextViewModel.copySourceProduct) {
+          setMessage("已载入源商品内容，保存后会创建一条新商品，不会覆盖原商品。");
+          return;
+        }
+
+        if (nextViewModel.copySourceError) {
+          setMessage(`复制来源商品加载失败：${nextViewModel.copySourceError}`);
+          return;
+        }
+      }
+
+      setMessage(nextViewModel.error);
     }
 
     void run();
@@ -86,7 +109,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [copyFromProductId, mode, productId]);
 
   const selectedCategory = useMemo(
     () => viewModel?.categories.find((category) => category.value === form.categoryId),
@@ -195,6 +218,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
     }
   }
 
+  const isCopyMode = mode === "create" && Boolean(copyFromProductId);
   const metrics = [
     { label: "分类数量", value: viewModel?.categories.length ?? 0, hint: "用于选择商品归属", accent: "cyan" },
     { label: "联系方式", value: viewModel?.contacts.length ?? 0, hint: "可绑定咨询入口", accent: "emerald" },
@@ -202,16 +226,16 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
     { label: "数据状态", value: viewModel?.source === "api" ? "正常" : "异常", hint: "失败时不显示样例数据", accent: "violet" }
   ] as const;
 
-  const effectiveProduct = viewModel?.product;
+  const effectiveProduct = mode === "create" ? viewModel?.copySourceProduct : viewModel?.product;
   const editRecordMissing = mode === "edit" && !loading && viewModel?.source === "api" && !effectiveProduct;
 
   return (
     <AdminShell>
       <div className="space-y-6">
         <AdminPageHeader
-          eyebrow={mode === "create" ? "商品管理 / 新增商品" : "商品管理 / 编辑商品"}
-          title={mode === "create" ? "新增商品" : `编辑商品 ${productId ?? ""}`.trim()}
-          description="按模块填写商品资料，保存后会同步到前台展示。"
+          eyebrow={isCopyMode ? "商品管理 / 复制商品" : mode === "create" ? "商品管理 / 新增商品" : "商品管理 / 编辑商品"}
+          title={isCopyMode ? "复制商品" : mode === "create" ? "新增商品" : `编辑商品 ${productId ?? ""}`.trim()}
+          description={isCopyMode ? "已带入来源商品内容，修改后保存会创建新商品，不会覆盖原商品。" : "按模块填写商品资料，保存后会同步到前台展示。"}
           actions={
             <>
               <Link href="/admin/products" className="admin-button-secondary">
@@ -494,7 +518,7 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
           </div>
 
           <div className="space-y-4">
-            <AdminMetricCard label="编辑模式" value={mode === "create" ? "新增" : "编辑"} hint="当前表单操作类型" accent="cyan" />
+            <AdminMetricCard label="编辑模式" value={isCopyMode ? "复制" : mode === "create" ? "新增" : "编辑"} hint="当前表单操作类型" accent="cyan" />
             <AdminMetricCard label="图集数量" value={String(toImageUrlsCount(form.imageUrlsText))} hint="提交时保存为数组" accent="emerald" />
             <AdminMetricCard label="数据状态" value={viewModel?.source === "api" ? "正常" : "异常"} hint="只使用后端返回数据" accent="amber" />
             <AdminMetricCard label="商品状态" value={toStatusLabel(Number(form.status) as AdminFlagValue)} hint="控制前台可见性" accent="violet" />
@@ -530,7 +554,8 @@ export function AdminProductEditor({ mode, productId }: AdminProductEditorProps)
                   </div>
                   {effectiveProduct ? (
                     <p className="text-xs leading-5 text-slate-500">
-                      最近更新：{formatProductDateTime(effectiveProduct.updatedAt)} · {toRecommendationLabel(Number(form.isRecommended) as AdminFlagValue)}
+                      {isCopyMode ? "来源商品更新" : "最近更新"}：{formatProductDateTime(effectiveProduct.updatedAt)} ·{" "}
+                      {toRecommendationLabel(Number(form.isRecommended) as AdminFlagValue)}
                     </p>
                   ) : null}
                 </div>

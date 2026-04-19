@@ -296,6 +296,9 @@ export function AdminProductManager() {
                               <Link href={`/admin/products/${product.id}`} className="admin-button-secondary !px-3 !py-1.5 !text-xs">
                                 编辑
                               </Link>
+                              <Link href={`/admin/products/create?copyFrom=${product.id}`} className="admin-button-secondary !px-3 !py-1.5 !text-xs">
+                                复制
+                              </Link>
                               <button
                                 className="admin-button-secondary !px-3 !py-1.5 !text-xs"
                                 onClick={() => void handleToggleStatus(product)}

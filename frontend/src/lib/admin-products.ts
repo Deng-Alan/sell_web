@@ -48,8 +48,10 @@ export type AdminProductEditorViewModel = {
   categories: AdminCategoryOption[];
   contacts: AdminContactRecord[];
   product: AdminProductRecord | null;
+  copySourceProduct: AdminProductRecord | null;
   source: "api" | "fallback";
   error: string | null;
+  copySourceError: string | null;
 };
 
 const PUBLIC_UPLOAD_PATH_PREFIX = "/api/admin/uploads/files/";
@@ -191,6 +193,27 @@ function formatApiError(error: unknown) {
   return error instanceof Error ? error.message : "未知错误";
 }
 
+async function loadOptionalProduct(productId?: string) {
+  if (!productId) {
+    return {
+      product: null,
+      error: null
+    };
+  }
+
+  try {
+    return {
+      product: await adminCatalogApi.getProduct(productId),
+      error: null
+    };
+  } catch (error) {
+    return {
+      product: null,
+      error: formatApiError(error)
+    };
+  }
+}
+
 export function createEmptyProductFormState() {
   return normalizeProductFormState(null);
 }
@@ -260,28 +283,33 @@ export async function loadAdminProductList(filters: AdminProductListFilters): Pr
   }
 }
 
-export async function loadAdminProductEditor(productId?: string): Promise<AdminProductEditorViewModel> {
+export async function loadAdminProductEditor(productId?: string, copyFromProductId?: string): Promise<AdminProductEditorViewModel> {
   try {
-    const [categories, contacts, product] = await Promise.all([
+    const [categories, contacts, productResult, copySourceResult] = await Promise.all([
       adminCatalogApi.listCategories(),
       adminCatalogApi.listContacts(),
-      productId ? adminCatalogApi.getProduct(productId) : Promise.resolve(null)
+      loadOptionalProduct(productId),
+      loadOptionalProduct(copyFromProductId)
     ]);
 
     return {
       categories: normalizeCategoryOptions(categories),
       contacts,
-      product: product ?? null,
+      product: productResult.product,
+      copySourceProduct: copySourceResult.product,
       source: "api",
-      error: null
+      error: productResult.error,
+      copySourceError: copySourceResult.error
     };
   } catch (error) {
     return {
       categories: [],
       contacts: [],
       product: null,
+      copySourceProduct: null,
       source: "fallback",
-      error: formatApiError(error)
+      error: formatApiError(error),
+      copySourceError: null
     };
   }
 }
