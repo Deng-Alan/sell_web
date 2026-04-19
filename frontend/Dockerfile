@@ -32,7 +32,10 @@ COPY --from=builder /app/public ./frontend/public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./frontend/.next/static
 
-WORKDIR /app/frontend
+COPY --from=builder /app/public ./app/public
+COPY --from=builder /app/.next/static ./app/.next/static
+
+WORKDIR /app/app
 
 EXPOSE 3000
 
