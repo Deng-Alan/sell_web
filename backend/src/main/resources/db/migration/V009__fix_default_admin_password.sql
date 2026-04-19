@@ -5,6 +5,5 @@ UPDATE admin_users
 SET password_hash = '$2b$12$DRGks6653xs5hCK.HsSI4ex/RUyUBeQiQOQp6D2/YCFEtunS9RPYC',
     username = 'sellwebadmin',
     nickname = 'SellWeb 管理员',
-    token_version = COALESCE(token_version, 0) + 1,
     updated_at = CURRENT_TIMESTAMP
 WHERE username IN ('admin', 'sellwebadmin');
