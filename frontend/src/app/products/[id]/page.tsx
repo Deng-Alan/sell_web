@@ -103,7 +103,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 href="/contact"
                 className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#1d1d1d]"
               >
-                联系购买
+                查看联系方式
               </Link>
             </div>
           </section>
@@ -169,10 +169,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <div className="rounded-[1.75rem] border border-[rgba(169,79,29,0.16)] bg-[linear-gradient(180deg,rgba(255,248,239,0.96)_0%,rgba(255,243,229,0.92)_100%)] p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">联系购买</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">联系客服下单</h2>
+                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">联系方式</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">查看客服渠道</h2>
                     <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">
-                      发送商品名称、截图或当前页面链接即可。默认客服渠道已在下方显示，也可以进入联系方式页选择微信或 QQ 购买入口。
+                      当前商品默认客服信息已在下方显示。需要继续咨询时，请进入联系方式页面扫码添加微信或 QQ 客服。
                     </p>
                   </div>
                   <div className="rounded-full border border-[rgba(16,16,16,0.08)] bg-white px-4 py-2 text-sm font-medium text-[var(--ink)]">
@@ -185,18 +185,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <ProductDataRow label="联系账号" value={product.contactValue} />
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <a
-                    href={product.contactHref}
-                    className="rounded-full bg-[var(--accent)] px-4 py-3 text-center text-sm font-medium text-white transition hover:bg-[#8f4318]"
-                  >
-                    联系购买
-                  </a>
+                <div className="mt-4">
                   <Link
                     href="/contact"
-                    className="rounded-full border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                    className="block rounded-full border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
-                    查看全部联系方式
+                    查看联系方式
                   </Link>
                 </div>
               </div>

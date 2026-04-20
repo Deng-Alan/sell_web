@@ -16,7 +16,7 @@ function getChannelLabel(contact: ShowcaseContactCard) {
 }
 
 function getChannelHint(channel: string) {
-  return channel === "QQ" ? "QQ 扫码购买" : "微信扫码购买";
+  return channel === "QQ" ? "在线咨询" : "在线咨询";
 }
 
 export default async function ContactPage() {
@@ -53,38 +53,36 @@ export default async function ContactPage() {
                   id={`contact-${contact.id}`}
                   className="rounded-[2rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_rgba(16,16,16,0.06)] sm:p-6"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">{getChannelHint(channelLabel)}</p>
-                      <h2 className="mt-3 text-3xl font-semibold text-[var(--ink)]">{channelLabel}</h2>
-                    </div>
-                    <span className="rounded-full border border-[rgba(16,16,16,0.08)] bg-[rgba(255,248,239,0.82)] px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-[var(--muted)]">
-                      人工购买
-                    </span>
+                  <div>
+                    <p className="text-xl font-semibold text-[var(--ink)]">{contact.label}</p>
+                    <p className="mt-4 break-all text-[2rem] font-semibold leading-none text-[var(--ink)] sm:text-[2.15rem]">
+                      {contact.value}
+                    </p>
+                    <p className="mt-4 text-lg text-[var(--ink)]">{getChannelHint(channelLabel)}</p>
                   </div>
 
-                  <div className="mt-5 overflow-hidden rounded-[1.6rem] border border-[var(--line)] bg-[rgba(255,248,239,0.72)] p-4">
+                  <div className="mt-5 rounded-[1.75rem] border border-[rgba(16,16,16,0.06)] bg-[rgba(255,250,244,0.92)] p-5">
                     {contact.qrImage ? (
-                      <img
-                        src={contact.qrImage}
-                        alt={contact.label}
-                        className="aspect-square w-full rounded-[1.2rem] border border-[rgba(16,16,16,0.06)] bg-white object-contain"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <div className="mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center overflow-hidden rounded-[1.4rem] border border-[rgba(16,16,16,0.06)] bg-white p-4">
+                        <img
+                          src={contact.qrImage}
+                          alt={contact.label}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
                     ) : (
-                      <div className="flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-[var(--line)] bg-white px-6 text-center text-sm leading-7 text-[var(--muted)]">
+                      <div className="mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--line)] bg-white px-6 text-center text-sm leading-7 text-[var(--muted)]">
                         暂未配置二维码，请直接使用下方账号联系。
                       </div>
                     )}
-                  </div>
 
-                  <div className="mt-5 rounded-[1.5rem] border border-[rgba(16,16,16,0.06)] bg-[rgba(255,250,244,0.88)] p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">联系账号</p>
-                    <p className="mt-2 break-all text-lg font-semibold text-[var(--ink)]">{contact.value}</p>
-                    <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                      扫码添加后，直接发送商品名称、截图或链接。客服确认信息后会继续跟进购买流程。
-                    </p>
+                    <div className="mt-5">
+                      <span className="inline-flex rounded-full border border-[rgba(16,16,16,0.08)] bg-white px-4 py-2 text-base font-medium text-[var(--ink)]">
+                        扫码添加
+                      </span>
+                    </div>
                   </div>
                 </article>
               );

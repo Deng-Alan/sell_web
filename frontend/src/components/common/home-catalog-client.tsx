@@ -353,19 +353,13 @@ function ProductCard({ product }: { product: ShowcaseProductCard }) {
           </div>
         </div>
 
-        <div className="relative z-20 grid grid-cols-2 gap-2">
+        <div className="relative z-20">
           <Link
             href={detailHref}
-            className="rounded-full border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="block rounded-full border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
             查看详情
           </Link>
-          <a
-            href={product.contactHref}
-            className="rounded-full bg-[var(--accent)] px-4 py-3 text-center text-sm font-medium text-white transition hover:bg-[#8f4318]"
-          >
-            联系购买
-          </a>
         </div>
       </div>
     </article>
