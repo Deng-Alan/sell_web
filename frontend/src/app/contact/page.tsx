@@ -63,17 +63,17 @@ export default async function ContactPage() {
 
                   <div className="mt-5 rounded-[1.75rem] border border-[rgba(16,16,16,0.06)] bg-[rgba(255,250,244,0.92)] p-5">
                     {contact.qrImage ? (
-                      <div className="mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center overflow-hidden rounded-[1.4rem] border border-[rgba(16,16,16,0.06)] bg-white p-4">
+                      <div className="mx-auto w-full max-w-[20rem] rounded-[1.4rem] border border-[rgba(16,16,16,0.06)] bg-white p-3">
                         <img
                           src={contact.qrImage}
                           alt={contact.label}
-                          className="h-full w-full object-contain"
+                          className="block h-auto w-full rounded-[1rem] object-contain"
                           loading="lazy"
                           decoding="async"
                         />
                       </div>
                     ) : (
-                      <div className="mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--line)] bg-white px-6 text-center text-sm leading-7 text-[var(--muted)]">
+                      <div className="mx-auto flex min-h-[18rem] w-full max-w-[20rem] items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--line)] bg-white px-6 text-center text-sm leading-7 text-[var(--muted)]">
                         暂未配置二维码，请直接使用下方账号联系。
                       </div>
                     )}
