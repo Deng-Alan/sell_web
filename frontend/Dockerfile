@@ -29,11 +29,17 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV INTERNAL_API_BASE_URL=${INTERNAL_API_BASE_URL}
 
 COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/public ./frontend/public
-COPY --from=builder /app/.next/static ./frontend/.next/static
+COPY --from=builder /app/public /tmp/public
+COPY --from=builder /app/.next/static /tmp/static
 
-WORKDIR /app/frontend
+RUN set -eux; \
+    APP_DIR="$(find /app -maxdepth 2 -type f -name server.js -exec dirname {} \; | head -n 1)"; \
+    test -n "$APP_DIR"; \
+    mkdir -p "$APP_DIR/public" "$APP_DIR/.next/static"; \
+    cp -r /tmp/public/. "$APP_DIR/public/"; \
+    cp -r /tmp/static/. "$APP_DIR/.next/static/"; \
+    echo "$APP_DIR" > /app/.appdir
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "cd \"$(cat /app/.appdir)\" && exec node server.js"]
